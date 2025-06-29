@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 32 32">
+  <defs>
+    <!-- Gradiente sofisticado para o coração -->
+    <radialGradient id="heartFaviconGradient" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#fda4af;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#f43f5e;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#be185d;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Sombra suave -->
+    <filter id="heartShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+    
+    <!-- Brilho interno -->
+    <filter id="heartGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <style>
+    <![CDATA[
+      .favicon-heart {
+        animation: gentlePulse 3s ease-in-out infinite;
+        transform-origin: center;
+      }
+      
+      @keyframes gentlePulse {
+        0%, 100% { 
+          transform: scale(1); 
+          opacity: 1;
+        }
+        50% { 
+          transform: scale(1.05); 
+          opacity: 0.9;
+        }
+      }
+    ]]>
+  </style>
+  
+  <!-- Coração favicon otimizado -->
+  <path class="favicon-heart" 
+        d="M16 28c-1.2 0-2.3-.3-3.2-.8C8.5 25.2 4 20.8 4 15.5c0-3.8 1.5-7.3 4.2-9.8C10.8 3.2 13.3 2 16 2s5.2 1.2 7.8 3.7c2.7 2.5 4.2 6 4.2 9.8 0 5.3-4.5 9.7-8.8 11.7-.9.5-2 .8-3.2.8z
+           M8 15.5c0 4.2 3.5 7.7 7 9.2.6.3 1.2.3 1.8 0 3.5-1.5 7-4.8 7-9.2 0-2.8-1.1-5.4-3.1-7.3C19.4 6.9 17.7 6 16 6s-3.4.9-4.7 2.2C9.1 10.1 8 12.7 8 15.5z
+           M16 12c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z" 
+        fill="url(#heartFaviconGradient)" 
+        filter="url(#heartShadow)"
+        opacity="0.95"/>
+  
+  <!-- Brilho adicional no centro -->
+  <circle cx="16" cy="14" r="2" fill="#ffffff" opacity="0.3" filter="url(#heartGlow)"/>
+</svg> 
