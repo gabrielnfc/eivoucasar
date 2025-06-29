@@ -1,0 +1,326 @@
+# Wedding MicroSaaS - Regras para desenvolvimento limpo e eficiente
+
+## 🎯 PRINCÍPIOS FUNDAMENTAIS
+
+- KISS (Keep It Simple, Stupid) - Simplicidade acima de tudo
+- DRY (Don't Repeat Yourself) - Zero duplicação desnecessária
+- YAGNI (You Aren't Gonna Need It) - Evite over-engineering
+- Clean Code - Código legível e auto-documentado
+- Performance First - Otimizações desde o início
+
+## 📝 CONVENÇÕES DE NOMENCLATURA
+
+### Componentes: PascalCase
+
+WeddingCard, GuestList, ContributionForm
+
+### Arquivos: kebab-case
+
+wedding-card.tsx, guest-list.tsx, contribution-form.tsx
+
+### Variáveis/Funções: camelCase
+
+guestCount, handleSubmit, createPayment
+
+### Constantes: UPPER_SNAKE_CASE
+
+MAX_GUESTS, DEFAULT_THEME, API_ENDPOINTS
+
+### Tipos/Interfaces: PascalCase com sufixo
+
+type User = {...}
+interface GuestData {...}
+type PaymentStatus = "pending" | "paid"
+
+## 🏗️ ESTRUTURA DE COMPONENTES
+
+### SEMPRE use esta estrutura
+
+1. Imports (externos → internos → tipos)
+2. Tipos/Interfaces locais
+3. Component principal
+4. Export default
+
+### Exemplo
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import type { Guest } from '@/types'
+
+interface Props {
+  guests: Guest[]
+}
+
+export default function GuestList({ guests }: Props) {
+  // lógica aqui
+}
+
+## 🎨 ESTILIZAÇÃO MODERNA
+
+### Use apenas Tailwind utility classes
+
+- NUNCA custom CSS a menos que absolutamente necessário
+- Prefira classes semânticas: bg-white, text-gray-900
+- Use design tokens consistentes: space-4, text-sm, rounded-lg
+- Dark mode ready: dark:bg-gray-900, dark:text-white
+
+### Paleta moderna minimalista
+
+- Primary: slate-900, slate-50
+- Accent: rose-500, rose-50
+- Success: emerald-500, emerald-50
+- Warning: amber-500, amber-50
+- Error: red-500, red-50
+
+### Componentes minimalistas
+
+- Bordas sutis: border border-gray-200
+- Sombras leves: shadow-sm, shadow-md (máximo)
+- Espaçamentos consistentes: p-4, gap-4, space-y-4
+- Tipografia limpa: text-sm, font-medium, leading-relaxed
+
+## ⚛️ PADRÕES REACT/NEXT.JS
+
+### Server Components por padrão
+
+- Use 'use client' APENAS quando necessário (interatividade)
+- Prefira Server Components para busca de dados
+- Client Components apenas para: forms, states, eventos
+
+### Hooks personalizados para lógica complexa
+
+- Exemplo
+
+function useGuests(coupleId: string) {
+  const [guests, setGuests] = useState<Guest[]>([])
+  // lógica aqui
+  return { guests, addGuest, updateGuest }
+}
+
+### NUNCA duplicate código
+
+- Extraia lógica comum em hooks
+- Crie componentes reutilizáveis
+- Use constantes para valores repetidos
+
+## 🗃️ PADRÕES DE DATABASE
+
+### SEMPRE use Prisma com TypeScript
+
+- Tipos automáticos: Prisma.Guest, Prisma.Couple
+- Queries type-safe: prisma.guest.findMany()
+- NUNCA SQL raw desnecessário
+
+### RLS (Row Level Security) obrigatório
+
+auth.uid() = couples.user_id
+
+### Padrão de queries
+
+const guests = await prisma.guest.findMany({
+  where: { coupleId },
+  include: { group: true },
+  orderBy: { createdAt: 'desc' }
+})
+
+## 🔧 PADRÕES DE API
+
+### SEMPRE validação com Zod
+
+import { z } from 'zod'
+
+const guestSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  phone: z.string().optional()
+})
+
+### Error handling consistente
+
+try {
+  const result = await action()
+  return { success: true, data: result }
+} catch (error) {
+  return { success: false, error: error.message }
+}
+
+### NUNCA exponha dados sensíveis
+
+- Sempre select específico
+- Sanitize outputs
+- Rate limiting em APIs públicas
+
+## 📱 RESPONSIVIDADE MODERNA
+
+### Mobile-first sempre
+
+- Base: mobile design
+- md: tablet (768px+)
+- lg: desktop (1024px+)
+- xl: large desktop (1280px+)
+
+### Grid moderno
+
+grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+
+### Flexbox semântico
+
+flex flex-col md:flex-row items-center justify-between
+
+## 🚀 PERFORMANCE
+
+### Otimizações obrigatórias
+
+- Dynamic imports: const Component = dynamic(() => import('./Heavy'))
+- Image optimization: Image do Next.js sempre
+- Lazy loading: loading="lazy" por padrão
+- Bundle analysis: evite bibliotecas pesadas
+
+### Evite re-renders
+
+- React.memo para componentes pesados
+- useMemo para computações custosas
+- useCallback para funções em deps
+
+## 🔐 SEGURANÇA
+
+### Validação em múltiplas camadas
+
+1. Frontend (UX) - Zod schemas
+2. API (segurança) - Validação server-side
+3. Database (integridade) - Constraints
+
+### NUNCA confie no cliente
+
+- Sempre validar no servidor
+- Rate limiting em APIs
+- Sanitize inputs
+
+## 🧪 QUALIDADE DE CÓDIGO
+
+### Comentários apenas quando necessário
+
+- Código deve ser auto-explicativo
+- Comentários para lógica complexa de negócio
+- JSDoc para funções utilitárias
+
+### Refatoração contínua
+
+- Funções pequenas (< 20 linhas)
+- Componentes focados (single responsibility)
+- Extraia constantes e tipos
+
+### EVITE
+
+- Nested ternários complexos
+- Funções anônimas em JSX
+- Estados desnecessários
+- Props drilling (use context quando necessário)
+
+## 🔄 PADRÕES DE ESTADO
+
+### useState para estado local simples
+
+### Para estado complexo, use useReducer
+
+const [state, dispatch] = useReducer(reducer, initialState)
+
+### Context apenas para
+
+- Tema/configurações globais
+- Auth state
+- Multi-tenant context (couple data)
+
+### NUNCA global state desnecessário
+
+## 📦 IMPORTS ORGANIZADOS
+
+### Ordem
+
+1. React/Next.js
+2. Bibliotecas externas
+3. Componentes internos
+4. Utils/helpers
+5. Tipos
+
+- Exemplo
+
+import React from 'react'
+import { NextPage } from 'next'
+import { Button } from '@/components/ui/button'
+import { GuestCard } from '@/components/guest-card'
+import { formatDate } from '@/lib/utils'
+import type { Guest } from '@/types'
+
+## 🌐 MULTI-TENANCY
+
+### SEMPRE considere isolamento
+
+- RLS no banco
+- Middleware para routing
+- Context para tenant atual
+- Cache por tenant
+
+### Padrão de hook
+
+function useTenant() {
+  const { slug } = useParams()
+  const couple = useCoupleBySlug(slug)
+  return { couple, isLoading }
+}
+
+## 🎯 INTEGRAÇÕES
+
+### Wrapper pattern para APIs externas
+
+class AbacatePayService {
+  async createPayment(data: PaymentData) {
+    // implementação limpa
+  }
+}
+
+### NUNCA hardcode credentials
+
+- Use env vars sempre
+- Validate env vars na inicialização
+- Type-safe env com Zod
+
+## 🚨 ANTI-PATTERNS (NUNCA FAÇA)
+
+❌ Componentes gigantes (>200 linhas)
+❌ Props drilling profundo
+❌ useState para dados do servidor
+❌ Fetch direto em componentes
+❌ CSS inline ou styled-components
+❌ console.log em produção
+❌ any types no TypeScript
+❌ Mutação direta de state
+❌ useEffect para tudo
+❌ Nested folders profundos
+
+## ✅ BOAS PRÁTICAS (SEMPRE FAÇA)
+
+✅ Componentes pequenos e focados
+✅ Custom hooks para lógica
+✅ Server Components quando possível
+✅ Error boundaries em componentes críticos
+✅ Loading states consistentes
+✅ TypeScript strict mode
+✅ Accessible components (a11y)
+✅ SEO meta tags
+✅ Progressive enhancement
+✅ Graceful degradation
+
+## 🔍 CODE REVIEW CHECKLIST
+
+Antes de commitar, verifique:
+□ Zero TypeScript errors
+□ Zero console.logs
+□ Componentes < 200 linhas
+□ Nomes descritivos
+□ Sem duplicação
+□ Performance otimizada
+□ Acessibilidade básica
+□ Mobile responsive
+□ Error handling
+□ Loading states

@@ -1,103 +1,290 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { ArrowRight, Heart, Users, Trophy, Star, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from '@/components/ui/button';
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+	CardContent,
+	CardIcon,
+} from '@/components/ui/card';
+import Navbar from '@/components/layout/navbar';
+import Logo from '@/components/ui/logo';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default function HomePage() {
+	const { user, loading } = useAuth();
+
+	return (
+		<div className="min-h-screen bg-mesh-gradient">
+			{/* Navigation */}
+			<Navbar currentPage="home" variant="transparent" />
+
+			{/* Hero Section */}
+			<section className="section-padding px-4 sm:px-6 lg:px-8">
+				<div className="container-modern">
+					<div className="text-center animate-fade-in">
+						<h1 className="heading-1 animate-stagger-1">
+							Transforme seu{' '}
+							<span className="text-gradient-primary">casamento</span> em uma
+							competição épica
+						</h1>
+
+						<p className="body-large mt-6 max-w-3xl mx-auto animate-stagger-2">
+							Crie um site único para seu casamento e gamifique as contribuições
+							dos convidados. Família vs Amigos: quem contribui mais para o seu
+							grande dia?
+						</p>
+
+						<div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6 animate-stagger-3">
+							{!loading && (
+								<>
+									{user ? (
+										<Button
+											asChild
+											variant="gradient"
+											size="lg"
+											icon={<ArrowRight className="h-5 w-5" />}
+											iconPosition="right"
+										>
+											<Link href="/dashboard">Ir para Dashboard</Link>
+										</Button>
+									) : (
+										<Button
+											asChild
+											variant="gradient"
+											size="lg"
+											animation="glow"
+											icon={<Sparkles className="h-5 w-5" />}
+											iconPosition="right"
+										>
+											<Link href="/signup">Criar Meu Site de Casamento</Link>
+										</Button>
+									)}
+								</>
+							)}
+
+							<Button asChild variant="glass" size="lg">
+								<Link href="#features">Ver Demonstração</Link>
+							</Button>
+						</div>
+
+						<div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-600 dark:text-neutral-400 animate-stagger-4">
+							<div className="flex items-center gap-2 glass-effect px-4 py-2 rounded-full">
+								<Star className="h-4 w-4 text-accent-500" />
+								<span>Setup em 5 minutos</span>
+							</div>
+							<div className="flex items-center gap-2 glass-effect px-4 py-2 rounded-full">
+								<Users className="h-4 w-4 text-secondary-500" />
+								<span>Ilimitados convidados</span>
+							</div>
+							<div className="flex items-center gap-2 glass-effect px-4 py-2 rounded-full">
+								<Trophy className="h-4 w-4 text-primary-500" />
+								<span>Rankings em tempo real</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			{/* Features Preview */}
+			<section
+				id="features"
+				className="section-padding px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm"
+			>
+				<div className="container-modern">
+					<div className="text-center space-component animate-fade-in">
+						<h2 className="heading-2">
+							Gamificação que{' '}
+							<span className="text-gradient-primary">funciona</span>
+						</h2>
+						<p className="body-large mt-4">
+							Transforme contribuições em competições divertidas
+						</p>
+					</div>
+
+					<div className="grid md:grid-cols-3 gap-8 animate-slide-up">
+						{/* Feature 1 */}
+						<Card
+							variant="elevated"
+							interactive="hover"
+							className="text-center group"
+						>
+							<CardHeader centered>
+								<CardIcon
+									variant="primary"
+									size="lg"
+									className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
+								>
+									<Users className="h-8 w-8" />
+								</CardIcon>
+								<CardTitle
+									size="lg"
+									className="group-hover:text-primary-600 transition-colors"
+								>
+									Grupos Competindo
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<CardDescription size="md">
+									Família da noiva vs família do noivo vs amigos. Quem contribui
+									mais para o casamento?
+								</CardDescription>
+							</CardContent>
+						</Card>
+
+						{/* Feature 2 */}
+						<Card
+							variant="gradient"
+							interactive="hover"
+							className="text-center group"
+						>
+							<CardHeader centered>
+								<CardIcon
+									variant="secondary"
+									size="lg"
+									className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
+								>
+									<Trophy className="h-8 w-8" />
+								</CardIcon>
+								<CardTitle
+									size="lg"
+									gradient
+									className="group-hover:scale-105 transition-transform"
+								>
+									Rankings em Tempo Real
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<CardDescription size="md">
+									Veja quem está na liderança e acompanhe as metas sendo
+									atingidas em tempo real.
+								</CardDescription>
+							</CardContent>
+						</Card>
+
+						{/* Feature 3 */}
+						<Card
+							variant="elevated"
+							interactive="hover"
+							className="text-center group"
+						>
+							<CardHeader centered>
+								<CardIcon
+									variant="accent"
+									size="lg"
+									className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
+								>
+									<Heart className="h-8 w-8" />
+								</CardIcon>
+								<CardTitle
+									size="lg"
+									className="group-hover:text-primary-600 transition-colors"
+								>
+									PIX Instantâneo
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<CardDescription size="md">
+									Contribuições via PIX com QR code automático. Receba o
+									dinheiro na sua conta instantaneamente.
+								</CardDescription>
+							</CardContent>
+						</Card>
+					</div>
+				</div>
+			</section>
+
+			{/* CTA Section */}
+			<section className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-primary relative overflow-hidden">
+				{/* Background decorative elements */}
+				<div className="absolute inset-0 bg-gradient-to-r from-primary-500/90 to-secondary-500/90"></div>
+				<div className="absolute top-0 left-0 w-96 h-96 bg-accent-300/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary-300/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+
+				<div className="container-modern relative z-10">
+					<div className="text-center animate-scale-in">
+						<h2 className="heading-2 text-white mb-4">
+							Pronto para gamificar seu casamento?
+						</h2>
+						<p className="body-large text-white/90 mb-10 max-w-2xl mx-auto">
+							Junte-se a centenas de casais que já transformaram suas cerimônias
+							em experiências únicas
+						</p>
+
+						<div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+							{!loading && (
+								<>
+									{user ? (
+										<Button
+											asChild
+											variant="glass"
+											size="xl"
+											icon={<ArrowRight className="h-6 w-6" />}
+											iconPosition="right"
+										>
+											<Link href="/dashboard">Acessar Dashboard</Link>
+										</Button>
+									) : (
+										<Button
+											asChild
+											variant="accent"
+											size="xl"
+											animation="glow"
+											icon={<Sparkles className="h-6 w-6" />}
+											iconPosition="right"
+										>
+											<Link href="/signup">Começar Agora - É Grátis</Link>
+										</Button>
+									)}
+								</>
+							)}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			{/* Footer */}
+			<footer className="border-t border-neutral-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm px-4 py-12 sm:px-6 lg:px-8">
+				<div className="container-modern">
+					<div className="flex flex-col md:flex-row items-center justify-between">
+						<div className="flex items-center space-x-3">
+							<Logo size="md" />
+						</div>
+
+						<div className="mt-6 md:mt-0 flex items-center space-x-8 text-sm text-neutral-600 dark:text-neutral-400">
+							<Link
+								href="/privacy"
+								className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"
+							>
+								Privacidade
+							</Link>
+							<Link
+								href="/terms"
+								className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"
+							>
+								Termos
+							</Link>
+							<Link
+								href="/contact"
+								className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"
+							>
+								Contato
+							</Link>
+						</div>
+					</div>
+
+					<div className="mt-8 border-t border-neutral-200 dark:border-neutral-700 pt-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+						<p>
+							© 2025 EiVouCasar. Transformando casamentos em experiências
+							inesquecíveis.
+						</p>
+					</div>
+				</div>
+			</footer>
+		</div>
+	);
 }
