@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/contexts/auth-context';
+import { CookieProvider } from '@/contexts/cookie-context';
 import { Toaster } from 'react-hot-toast';
+import CookieBanner from '@/components/cookies/cookie-banner';
 
 const inter = Inter({
 	subsets: ['latin'],
@@ -79,35 +81,38 @@ export default function RootLayout({
 	return (
 		<html lang="pt-BR" className={inter.variable}>
 			<body className={`${inter.className} antialiased`}>
-				<AuthProvider>
-					{children}
-					<Toaster
-						position="top-right"
-						toastOptions={{
-							duration: 4000,
-							style: {
-								background: '#1e293b',
-								color: '#f8fafc',
-								border: '1px solid #334155',
-								borderRadius: '12px',
-								boxShadow:
-									'0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-							},
-							success: {
-								iconTheme: {
-									primary: '#10b981',
-									secondary: '#ffffff',
+				<CookieProvider>
+					<AuthProvider>
+						{children}
+						<CookieBanner />
+						<Toaster
+							position="top-right"
+							toastOptions={{
+								duration: 4000,
+								style: {
+									background: '#1e293b',
+									color: '#f8fafc',
+									border: '1px solid #334155',
+									borderRadius: '12px',
+									boxShadow:
+										'0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
 								},
-							},
-							error: {
-								iconTheme: {
-									primary: '#ef4444',
-									secondary: '#ffffff',
+								success: {
+									iconTheme: {
+										primary: '#10b981',
+										secondary: '#ffffff',
+									},
 								},
-							},
-						}}
-					/>
-				</AuthProvider>
+								error: {
+									iconTheme: {
+										primary: '#ef4444',
+										secondary: '#ffffff',
+									},
+								},
+							}}
+						/>
+					</AuthProvider>
+				</CookieProvider>
 			</body>
 		</html>
 	);

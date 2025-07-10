@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/database/prisma'
 
 export async function POST(request: NextRequest) {
@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser(token)
     
     if (error || !user) {

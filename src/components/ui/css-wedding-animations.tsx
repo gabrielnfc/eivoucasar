@@ -830,8 +830,7 @@ export function CSSWeddingBackground({
 					}}
 				>
 					<CSSHeartAnimation
-						size={i % 2 === 0 ? 'md' : 'sm'}
-						delay={i * 2000}
+						variant="section"
 					/>
 				</div>
 			))}
@@ -846,7 +845,7 @@ export function CSSWeddingBackground({
 						top: `${25 + ((i * 35) % 50)}%`,
 					}}
 				>
-					<CSSRingsAnimation size="lg" delay={i * 3000} />
+					<CSSRingsAnimation variant="section" />
 				</div>
 			))}
 
@@ -861,8 +860,7 @@ export function CSSWeddingBackground({
 					}}
 				>
 					<CSSFlowerAnimation
-						size={i % 2 === 0 ? 'md' : 'sm'}
-						delay={i * 1500}
+						variant="section"
 					/>
 				</div>
 			))}
@@ -877,7 +875,7 @@ export function CSSWeddingBackground({
 						bottom: `${20 + ((i * 40) % 60)}%`,
 					}}
 				>
-					<CSSBouquetAnimation size="lg" delay={i * 4000} />
+					<CSSBouquetAnimation variant="section" />
 				</div>
 			))}
 
@@ -891,7 +889,7 @@ export function CSSWeddingBackground({
 						top: `${40 + ((i * 30) % 40)}%`,
 					}}
 				>
-					<CSSCoupleAnimation size="xl" delay={i * 6000} />
+					<CSSCoupleAnimation variant="section" />
 				</div>
 			))}
 
@@ -905,7 +903,7 @@ export function CSSWeddingBackground({
 						top: `${10 + ((i * 25) % 50)}%`,
 					}}
 				>
-					<CSSChurchAnimation size="lg" delay={i * 5000} />
+					<CSSChurchAnimation variant="section" />
 				</div>
 			))}
 
@@ -919,7 +917,7 @@ export function CSSWeddingBackground({
 						bottom: `${35 + ((i * 25) % 50)}%`,
 					}}
 				>
-					<CSSToastAnimation size="md" delay={i * 3500} />
+					<CSSToastAnimation variant="section" />
 				</div>
 			))}
 
@@ -933,7 +931,7 @@ export function CSSWeddingBackground({
 						top: `${10 + ((i * 18) % 80)}%`,
 					}}
 				>
-					<CSSSparklesAnimation size="sm" delay={i * 800} />
+					<CSSSparklesAnimation variant="section" />
 				</div>
 			))}
 		</div>

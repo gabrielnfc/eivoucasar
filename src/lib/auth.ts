@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 // Tipos de autenticação
 export interface SignUpData {
@@ -78,6 +78,7 @@ export async function signUp(data: SignUpData) {
     const weddingDateTime = `${weddingDate}T${weddingTime}:00.000Z`
     
     // 1. Criar usuário no Supabase Auth
+    const supabase = createClient()
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -110,6 +111,7 @@ export async function signUp(data: SignUpData) {
  */
 export async function signIn(data: SignInData) {
   try {
+    const supabase = createClient()
     const { data: authData, error } = await supabase.auth.signInWithPassword(data)
     
     if (error) throw error
@@ -125,6 +127,7 @@ export async function signIn(data: SignInData) {
  */
 export async function signOut() {
   try {
+    const supabase = createClient()
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     
@@ -139,6 +142,7 @@ export async function signOut() {
  */
 export async function getCurrentUser() {
   try {
+    const supabase = createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     
     if (error) throw error
@@ -154,6 +158,7 @@ export async function getCurrentUser() {
  */
 export async function resetPassword(email: string) {
   try {
+    const supabase = createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createGuest, getGuestsByCoupleId } from '@/lib/database/guests'
 import { getCoupleByUserId } from '../../../../lib/database/couples'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { z } from 'zod'
 
 const companionSchema = z.object({
@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    const supabase = createClient()
     const { data: { user }, error } = await supabase.auth.getUser(token)
     
     if (error || !user) {
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    const supabase = createClient()
     const { data: { user }, error } = await supabase.auth.getUser(token)
     
     if (error || !user) {

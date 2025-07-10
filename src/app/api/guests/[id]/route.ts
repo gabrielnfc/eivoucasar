@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { getCoupleByUserId } from '@/lib/database/couples'
 import { updateGuest } from '@/lib/database/guests'
 import { z } from 'zod'
@@ -35,6 +35,7 @@ export async function PATCH(
     const { id: guestId } = await params
     
     // Verificar autenticação
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

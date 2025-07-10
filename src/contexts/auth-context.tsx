@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 import type { AuthUser } from '@/lib/auth';
 
 interface AuthContextType {
@@ -17,15 +17,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [initialized, setInitialized] = useState(false);
 
-	const refreshUser = async () => {
+	// Use a single instance throughout the component
+	const supabase = useMemo(() => createClient(), []);
+
+	const refreshUser = useCallback(async () => {
 		try {
 			const {
 				data: { user: authUser },
 				error,
 			} = await supabase.auth.getUser();
 
-			if (error || !authUser) {
+			if (error) {
+				console.error('AuthContext: Erro ao buscar usuário:', error);
+				// Só deslogar se for erro de token inválido
+				if (error.message.includes('invalid') || error.message.includes('expired')) {
+					setUser(null);
+				}
+				return;
+			}
+
+			if (!authUser) {
 				setUser(null);
 				return;
 			}
@@ -40,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					.single();
 				coupleData = data;
 			} catch (coupleError) {
+				console.log('AuthContext: Perfil de casal incompleto ou erro temporário');
 				// Perfil de casal incompleto - será solicitado completar na UI
 				coupleData = null;
 			}
@@ -47,24 +61,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			const userData: AuthUser = {
 				id: authUser.id,
 				email: authUser.email!,
-				emailSecondary:
-					coupleData?.email_secondary ||
-					authUser.user_metadata?.email_secondary,
-				brideName: coupleData?.bride_name || authUser.user_metadata?.bride_name,
-				groomName: coupleData?.groom_name || authUser.user_metadata?.groom_name,
-				city: coupleData?.city || authUser.user_metadata?.city,
-				state: coupleData?.state || authUser.user_metadata?.state,
-				country: coupleData?.country || authUser.user_metadata?.country,
-				bridePhone:
-					coupleData?.bride_phone || authUser.user_metadata?.bride_phone,
-				groomPhone:
-					coupleData?.groom_phone || authUser.user_metadata?.groom_phone,
-				weddingDateTime:
-					coupleData?.wedding_datetime ||
-					authUser.user_metadata?.wedding_datetime,
-				signupRole:
-					coupleData?.signup_role || authUser.user_metadata?.signup_role,
-				slug: coupleData?.slug,
+				emailSecondary: coupleData?.email_secondary as string | undefined,
+				brideName: coupleData?.bride_name as string | undefined,
+				groomName: coupleData?.groom_name as string | undefined,
+				city: coupleData?.city as string | undefined,
+				state: coupleData?.state as string | undefined,
+				country: coupleData?.country as string | undefined,
+				bridePhone: coupleData?.bride_phone as string | undefined,
+				groomPhone: coupleData?.groom_phone as string | undefined,
+				weddingDateTime: coupleData?.wedding_datetime as string | undefined,
+				signupRole: coupleData?.signup_role as string | undefined,
+				slug: coupleData?.slug as string | undefined,
 				isProfileComplete: !!coupleData, // Verdadeiro apenas se existe na tabela couples
 			};
 
@@ -73,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			console.error('AuthContext: Erro ao atualizar usuário:', error);
 			// Não deslogar por erro de rede - manter usuário logado
 		}
-	};
+	}, [supabase]);
 
 	const handleSignOut = async () => {
 		try {
@@ -85,23 +92,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	useEffect(() => {
-		// Verificar usuário inicial
-		refreshUser().finally(() => setLoading(false));
+		let isMounted = true;
 
-		// Listen para mudanças de auth
+		const initializeAuth = async () => {
+			try {
+				// Verificar usuário inicial
+				await refreshUser();
+			} catch (error) {
+				console.error('Erro na inicialização de auth:', error);
+			} finally {
+				if (isMounted) {
+					setLoading(false);
+					setInitialized(true);
+				}
+			}
+		};
+
+		// Só inicializar se ainda não foi inicializado
+		if (!initialized) {
+			initializeAuth();
+		}
+
+		// Listen para mudanças de auth apenas após inicialização
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange(async (event, session) => {
+		} = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+			if (!initialized) return; // Ignorar eventos durante inicialização
+
 			if (event === 'SIGNED_IN' && session?.user) {
 				await refreshUser();
 			} else if (event === 'SIGNED_OUT') {
 				setUser(null);
 			}
-			setLoading(false);
 		});
 
-		return () => subscription.unsubscribe();
-	}, []);
+		return () => {
+			isMounted = false;
+			subscription.unsubscribe();
+		};
+	}, [supabase, refreshUser, initialized]);
 
 	const value = {
 		user,

@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import type { Guest, GuestGroup, CreateGuestData, CreateGroupData, UpdateGuestData } from '@/types/guest'
 
 class ApiClient {
   private async getAuthToken(): Promise<string | null> {
+    const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     return session?.access_token || null
   }

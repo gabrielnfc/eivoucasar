@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createGroup, getGroupsByCoupleId } from '@/lib/database/guests'
 import { getCoupleByUserId } from '../../../../lib/database/couples'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser(token)
     
     if (error || !user) {
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser(token)
     
     if (error || !user) {
