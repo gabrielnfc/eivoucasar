@@ -33,6 +33,7 @@ import {
 import { TemplateSection, WeddingTemplate, GallerySection as GallerySectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface GallerySectionProps {
   section: TemplateSection;
@@ -69,6 +70,7 @@ export function GallerySection({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isSlideshow, setIsSlideshow] = useState(false);
   const [slideshowInterval, setSlideshowInterval] = useState<NodeJS.Timeout | null>(null);
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -275,8 +277,8 @@ export function GallerySection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -285,8 +287,8 @@ export function GallerySection({
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            background: `radial-gradient(circle at 30% 70%, ${template.colors.primary}, transparent 60%),
-                        radial-gradient(circle at 70% 30%, ${template.colors.secondary}, transparent 60%)`
+            background: `radial-gradient(circle at 30% 70%, ${themeStyles.primary}, transparent 60%),
+                        radial-gradient(circle at 70% 30%, ${themeStyles.secondary}, transparent 60%)`
           }}
         />
 
@@ -299,7 +301,7 @@ export function GallerySection({
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                color: template.colors.primary,
+                color: themeStyles.primary,
               }}
               animate={{
                 y: [0, -30, 0],
@@ -331,11 +333,8 @@ export function GallerySection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -343,11 +342,8 @@ export function GallerySection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title?.value || ''}
@@ -361,8 +357,8 @@ export function GallerySection({
               onSave={(value) => onFieldUpdate('subtitle', String(value))}
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -370,8 +366,8 @@ export function GallerySection({
             <p
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {data.subtitle?.value || 'Momentos especiais da nossa jornada juntos'}
@@ -381,7 +377,7 @@ export function GallerySection({
           <motion.div
             className="w-32 h-1 mx-auto rounded-full"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             variants={itemVariants}
           />
@@ -406,12 +402,12 @@ export function GallerySection({
                 )}
                 style={{
                   background: selectedCategory === category.id 
-                    ? `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                    ? themeStyles.primaryGradient
                     : 'rgba(255,255,255,0.7)',
                   backdropFilter: 'blur(10px)',
                   border: selectedCategory === category.id 
                     ? 'none' 
-                    : `1px solid ${template.colors.primary}30`
+                    : `1px solid ${themeStyles.primary}30`
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -438,12 +434,12 @@ export function GallerySection({
                 )}
                 style={{
                   background: layout === option.id 
-                    ? template.colors.primary
+                    ? themeStyles.primary
                     : 'rgba(255,255,255,0.7)',
                   backdropFilter: 'blur(10px)',
                   border: layout === option.id 
                     ? 'none' 
-                    : `1px solid ${template.colors.primary}30`
+                    : `1px solid ${themeStyles.primary}30`
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -515,51 +511,41 @@ export function GallerySection({
                       <h3
                         className="font-medium mb-1"
                         style={{
-                          color: template.colors.text,
-                          fontFamily: template.fonts.heading
+                          fontFamily: themeStyles.fontSecondary,
+                          color: themeStyles.text,
                         }}
                       >
                         {image.caption}
                       </h3>
-                      <div className="flex items-center gap-4 text-sm">
-                        {image.date && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span
-                              style={{
-                                color: template.colors.textSecondary,
-                                fontFamily: template.fonts.body
-                              }}
-                            >
-                              {new Date(image.date).toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
-                        )}
-                        {image.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            <span
-                              style={{
-                                color: template.colors.textSecondary,
-                                fontFamily: template.fonts.body
-                              }}
-                            >
-                              {image.location}
-                            </span>
-                          </div>
-                        )}
+                      <div className="flex items-center justify-between text-sm mt-2">
+                        <span
+                          style={{
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.textSecondary,
+                          }}
+                        >
+                          {image.location}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.textSecondary,
+                          }}
+                        >
+                          {image.date}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-2">
                           <Heart className="w-4 h-4 text-red-500" />
                           <span
                             className="text-sm"
                             style={{
-                              color: template.colors.textSecondary,
-                              fontFamily: template.fonts.body
+                              fontFamily: themeStyles.fontPrimary,
+                              color: themeStyles.textSecondary,
                             }}
                           >
-                            {image.likes}
+                            {image.likes} curtidas
                           </span>
                         </div>
                         <button
@@ -567,9 +553,9 @@ export function GallerySection({
                             e.stopPropagation();
                             shareImage(image);
                           }}
-                          className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                         >
-                          <Share2 className="w-4 h-4" style={{ color: template.colors.secondary }} />
+                          <Share2 className="w-4 h-4" style={{ color: themeStyles.secondary }} />
                         </button>
                       </div>
                     </div>
@@ -606,20 +592,20 @@ export function GallerySection({
                       <h3
                         className="font-medium mb-1"
                         style={{
-                          color: template.colors.text,
-                          fontFamily: template.fonts.heading
+                          fontFamily: themeStyles.fontSecondary,
+                          color: themeStyles.text,
                         }}
                       >
                         {image.caption}
                       </h3>
                       <p
-                        className="text-sm"
+                        className="text-sm mb-4"
                         style={{
-                          color: template.colors.textSecondary,
-                          fontFamily: template.fonts.body
+                          fontFamily: themeStyles.fontPrimary,
+                          color: themeStyles.textSecondary,
                         }}
                       >
-                        {image.location}
+                        {image.location} • {image.date}
                       </p>
                     </div>
                   </motion.div>
@@ -656,20 +642,20 @@ export function GallerySection({
                         <h3
                           className="font-medium mb-1"
                           style={{
-                            color: template.colors.text,
-                            fontFamily: template.fonts.heading
+                            fontFamily: themeStyles.fontSecondary,
+                            color: themeStyles.text,
                           }}
                         >
                           {image.caption}
                         </h3>
                         <p
-                          className="text-sm"
+                          className="text-sm mb-4"
                           style={{
-                            color: template.colors.textSecondary,
-                            fontFamily: template.fonts.body
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.textSecondary,
                           }}
                         >
-                          {image.location}
+                          {image.location} • {image.date}
                         </p>
                       </div>
                     </motion.div>
@@ -689,14 +675,14 @@ export function GallerySection({
             <motion.button
               className="px-8 py-4 rounded-full font-medium transition-all duration-300 flex items-center gap-2 mx-auto"
               style={{
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
+                background: themeStyles.primaryGradient,
                 color: 'white'
               }}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <PlusCircle className="w-5 h-5" />
-              Adicionar Mais Fotos
+              <PlusCircle className="w-5 h-5 mr-2" />
+              Adicionar Foto
             </motion.button>
           </motion.div>
         )}

@@ -1,223 +1,213 @@
-'use client';
+'use client'
 
-// ===============================================
-// EICASEI - PRICING TABLE COMPONENT
-// ===============================================
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Check, Star, Crown, Zap } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/auth-context'
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import {
-	SUBSCRIPTION_PLANS,
-	formatPrice,
-	type PlanId,
-} from '@/lib/stripe/products';
-import { Check, Sparkles } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+const plans = [
+  {
+    id: 'basic',
+    name: 'Básico',
+    description: 'Perfeito para casamentos menores',
+    price: {
+      monthly: 29.90,
+      yearly: 299.90,
+    },
+    features: [
+      'Até 50 convidados',
+      'Site personalizado',
+      'RSVP online',
+      'Lista de presentes',
+      'Gamificação básica',
+      'Email notifications',
+      'Suporte por email',
+    ],
+    icon: <Star className="h-6 w-6" />,
+    popular: false,
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    description: 'Ideal para a maioria dos casamentos',
+    price: {
+      monthly: 49.90,
+      yearly: 499.90,
+    },
+    features: [
+      'Até 150 convidados',
+      'Domínio customizado',
+      'Todas as funcionalidades básicas',
+      'Gamificação avançada',
+      'Analytics detalhado',
+      'Templates premium',
+      'Suporte prioritário',
+      'Backup automático',
+    ],
+    icon: <Crown className="h-6 w-6" />,
+    popular: true,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    description: 'Para casamentos grandes e exclusivos',
+    price: {
+      monthly: 79.90,
+      yearly: 799.90,
+    },
+    features: [
+      'Convidados ilimitados',
+      'Múltiplos domínios',
+      'Todas as funcionalidades premium',
+      'White-label parcial',
+      'API access',
+      'Analytics completo',
+      'Suporte dedicado',
+      'Setup personalizado',
+    ],
+    icon: <Zap className="h-6 w-6" />,
+    popular: false,
+  },
+]
 
-interface PricingTableProps {
-	onSelectPlan?: (planId: PlanId, interval: 'monthly' | 'yearly') => void;
-	className?: string;
-}
+export default function PricingTable() {
+  const [isYearly, setIsYearly] = useState(false)
+  // Pricing table não deve forçar verificação de auth - apenas verificar passivamente
+  const { user } = useAuth()
 
-export default function PricingTable({
-	onSelectPlan,
-	className,
-}: PricingTableProps) {
-	const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly');
-	const [loading, setLoading] = useState<string | null>(null);
-	const { user } = useAuth();
+  const handleSelectPlan = (planId: string) => {
+    if (user) {
+      // Usuário logado - ir direto para checkout
+      window.location.href = `/checkout?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`
+    } else {
+      // Usuário não logado - ir para signup com plano selecionado
+      window.location.href = `/signup?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`
+    }
+  }
 
-	const handleSelectPlan = async (planId: PlanId) => {
-		if (!user) {
-			// Redirect to login if not authenticated
-			window.location.href = '/login?redirect=/pricing';
-			return;
-		}
+  return (
+    <div className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Escolha seu plano perfeito
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Transforme seu casamento em uma celebração inesquecível com nossos planos flexíveis
+          </p>
 
-		setLoading(planId);
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center space-x-4">
+            <span className={`text-sm ${!isYearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+              Mensal
+            </span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isYearly ? 'bg-primary-500' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isYearly ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className={`text-sm ${isYearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+              Anual
+            </span>
+            {isYearly && (
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                Economize 17%
+              </span>
+            )}
+          </div>
+        </div>
 
-		try {
-			if (onSelectPlan) {
-				onSelectPlan(planId, interval);
-			} else {
-				// Default behavior: redirect to checkout
-				const response = await fetch('/api/stripe/checkout', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						planId,
-						interval,
-						userId: user.id,
-						email: user.email,
-					}),
-				});
+        {/* Plans Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`relative bg-white rounded-2xl shadow-lg overflow-hidden ${
+                plan.popular ? 'ring-2 ring-primary-500 transform scale-105' : ''
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute top-0 left-0 right-0 bg-primary-500 text-white text-center py-2 text-sm font-medium">
+                  Mais Popular
+                </div>
+              )}
 
-				const { url, error } = await response.json();
+              <div className={`p-8 ${plan.popular ? 'pt-16' : ''}`}>
+                {/* Plan Header */}
+                <div className="text-center mb-8">
+                  <div className="flex justify-center mb-4 text-primary-500">
+                    {plan.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <p className="text-gray-600 mb-6">{plan.description}</p>
+                  
+                  {/* Price */}
+                  <div className="mb-6">
+                    <div className="flex items-baseline justify-center">
+                      <span className="text-4xl font-bold text-gray-900">
+                        R$ {isYearly ? plan.price.yearly.toFixed(0) : plan.price.monthly.toFixed(2)}
+                      </span>
+                      <span className="text-gray-500 ml-1">
+                        /{isYearly ? 'ano' : 'mês'}
+                      </span>
+                    </div>
+                    {isYearly && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        R$ {(plan.price.yearly / 12).toFixed(2)}/mês
+                      </p>
+                    )}
+                  </div>
 
-				if (error) {
-					throw new Error(error);
-				}
+                  {/* CTA Button */}
+                  <Button
+                    onClick={() => handleSelectPlan(plan.id)}
+                    className={`w-full ${
+                      plan.popular
+                        ? 'bg-primary-500 hover:bg-primary-600 text-white'
+                        : 'bg-gray-900 hover:bg-gray-800 text-white'
+                    }`}
+                  >
+                    {user ? 'Assinar Agora' : 'Começar Grátis'}
+                  </Button>
+                </div>
 
-				if (url) {
-					window.location.href = url;
-				}
-			}
-		} catch (error) {
-			console.error('Error selecting plan:', error);
-			alert('Erro ao processar pagamento. Tente novamente.');
-		} finally {
-			setLoading(null);
-		}
-	};
+                {/* Features List */}
+                <div className="space-y-4">
+                  {plan.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-start space-x-3">
+                      <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-600 text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-	return (
-		<div className={`w-full max-w-6xl mx-auto ${className}`}>
-			{/* Interval Toggle */}
-			<div className="flex justify-center mb-8">
-				<div className="relative flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-					<button
-						onClick={() => setInterval('monthly')}
-						className={`px-6 py-2 text-sm font-medium rounded-md transition-all ${
-							interval === 'monthly'
-								? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md'
-								: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-						}`}
-					>
-						Mensal
-					</button>
-					<button
-						onClick={() => setInterval('yearly')}
-						className={`px-6 py-2 text-sm font-medium rounded-md transition-all relative ${
-							interval === 'yearly'
-								? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md'
-								: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-						}`}
-					>
-						Anual
-						<span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">
-							-17%
-						</span>
-					</button>
-				</div>
-			</div>
-
-			{/* Plans Grid */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-				{Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => {
-					const planId = key as PlanId;
-					const price =
-						interval === 'monthly' ? plan.priceMonthly : plan.priceYearly;
-					const isPopular = planId === 'PREMIUM';
-
-					return (
-						<Card
-							key={planId}
-							className={`relative p-8 bg-white dark:bg-slate-800 ${
-								isPopular
-									? 'border-2 border-rose-500 shadow-xl scale-105'
-									: 'border border-slate-200 dark:border-slate-700'
-							}`}
-						>
-							{/* Popular Badge */}
-							{isPopular && (
-								<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-									<div className="bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-										<Sparkles className="w-4 h-4" />
-										Mais Popular
-									</div>
-								</div>
-							)}
-
-							{/* Plan Header */}
-							<div className="text-center mb-8">
-								<h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-									{plan.name}
-								</h3>
-								<p className="text-slate-600 dark:text-slate-400 mb-6">
-									{plan.description}
-								</p>
-
-								<div className="mb-6">
-									<div className="flex items-baseline justify-center">
-										<span className="text-4xl font-bold text-slate-900 dark:text-white">
-											{formatPrice(price)}
-										</span>
-										<span className="text-slate-600 dark:text-slate-400 ml-2">
-											/{interval === 'monthly' ? 'mês' : 'ano'}
-										</span>
-									</div>
-									{interval === 'yearly' && (
-										<p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2">
-											Economie{' '}
-											{formatPrice(plan.priceMonthly * 12 - plan.priceYearly)}{' '}
-											por ano
-										</p>
-									)}
-								</div>
-
-								<Button
-									onClick={() => handleSelectPlan(planId)}
-									disabled={loading === planId}
-									className={`w-full py-3 ${
-										isPopular
-											? 'bg-rose-500 hover:bg-rose-600 text-white'
-											: 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100'
-									}`}
-								>
-									{loading === planId ? 'Processando...' : 'Começar Agora'}
-								</Button>
-							</div>
-
-							{/* Features List */}
-							<div className="space-y-4">
-								{plan.features.map((feature, index) => (
-									<div key={index} className="flex items-center gap-3">
-										<Check className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-										<span className="text-slate-700 dark:text-slate-300 text-sm">
-											{feature}
-										</span>
-									</div>
-								))}
-							</div>
-
-							{/* Plan Limits */}
-							<div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-								<div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
-									<div>
-										Convidados:{' '}
-										{plan.maxGuests === -1 ? 'Ilimitados' : plan.maxGuests}
-									</div>
-									<div>
-										Fotos:{' '}
-										{plan.maxPhotos === -1 ? 'Ilimitadas' : plan.maxPhotos}
-									</div>
-									{plan.allowsCustomDomain && (
-										<div>✓ Domínio personalizado</div>
-									)}
-									{plan.allowsAnalytics && <div>✓ Analytics avançado</div>}
-								</div>
-							</div>
-						</Card>
-					);
-				})}
-			</div>
-
-			{/* FAQ or Additional Info */}
-			<div className="text-center mt-12">
-				<p className="text-slate-600 dark:text-slate-400 text-sm">
-					Todos os planos incluem 7 dias grátis. Cancele quando quiser.
-				</p>
-				<p className="text-slate-600 dark:text-slate-400 text-sm mt-2">
-					Dúvidas?{' '}
-					<a href="/contact" className="text-rose-500 hover:underline">
-						Entre em contato
-					</a>
-				</p>
-			</div>
-		</div>
-	);
+        {/* Bottom CTA */}
+        <div className="text-center mt-16">
+          <p className="text-gray-600 mb-4">
+            Não tem certeza qual plano escolher? Comece com o teste grátis de 14 dias.
+          </p>
+          <Button variant="outline" onClick={() => handleSelectPlan('basic')}>
+            Teste Grátis por 14 Dias
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
  

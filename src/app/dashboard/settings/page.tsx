@@ -6,8 +6,10 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Sparkles, Edit3, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/auth-context'
+import { ThemeProvider } from '@/contexts/theme-context'
 import SettingsForm from '@/components/dashboard/settings-form'
 import { TemplateRenderer } from '@/components/templates/template-renderer'
+import ThemeSelector from '@/components/ui/theme-selector'
 import { createClient } from '@/lib/supabase/client'
 import type { Couple } from '@/types'
 import type { WeddingTemplate } from '@/types/template'
@@ -86,7 +88,7 @@ export default function SettingsPage() {
       setIsPublishing(true)
       setPublishMessage('')
 
-      const response = await fetch(`/api/couples/${couple.slug}`, {
+      const response = await fetch(`/api/couples/${couple.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -206,180 +208,185 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Toolbar Fixo */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm"
-      >
-        <div className="flex h-16 items-center justify-between px-4">
-          {/* Left side - Back button and title */}
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/dashboard')}
-              className="hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Dashboard
-            </Button>
-            
-            <div className="h-6 w-px bg-gray-300"></div>
-            
-            <div className="flex items-center space-x-2">
-              <Edit3 className="h-5 w-5 text-purple-600" />
-              <span className="font-semibold text-gray-800">Editor do Site</span>
+    <ThemeProvider coupleId={couple?.id}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Toolbar Fixo */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm"
+        >
+          <div className="flex h-16 items-center justify-between px-4">
+            {/* Left side - Back button and title */}
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="hover:bg-gray-100"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+              
+              <div className="h-6 w-px bg-gray-300"></div>
+              
+              <div className="flex items-center space-x-2">
+                <Edit3 className="h-5 w-5 text-purple-600" />
+                <span className="font-semibold text-gray-800">Editor do Site</span>
+                {couple && (
+                  <span className="text-sm text-gray-500">
+                    - {couple.bride_name} & {couple.groom_name}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Center - Tab Navigation */}
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-100 rounded-lg p-1 flex">
+                <button
+                  onClick={() => setActiveTab('editor')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'editor'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Edit3 className="w-4 h-4 mr-2 inline" />
+                  Editor Visual
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'settings'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 mr-2 inline" />
+                  Configurações
+                </button>
+              </div>
+              
+              {/* Theme Selector */}
+              <ThemeSelector />
+            </div>
+
+            {/* Right side - Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Site status */}
               {couple && (
-                <span className="text-sm text-gray-500">
-                  - {couple.bride_name} & {couple.groom_name}
-                </span>
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className={`w-2 h-2 rounded-full ${(couple as any).is_published ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                  <span className="text-gray-600">
+                    {(couple as any).is_published ? 'Publicado' : 'Rascunho'}
+                  </span>
+                </div>
+              )}
+
+              {/* Publish button */}
+              <Button
+                onClick={handlePublishSite}
+                disabled={isPublishing || !couple}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                {isPublishing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Publicando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Publicar Site
+                  </>
+                )}
+              </Button>
+
+              {/* View site & copy link */}
+              {(couple as any)?.is_published && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`/${couple.slug}`, '_blank')}
+                  >
+                    Ver Site
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/${couple.slug}`)
+                      setPublishMessage('✅ Link copiado para a área de transferência!')
+                      setTimeout(() => setPublishMessage(''), 2000)
+                    }}
+                  >
+                    Copiar Link
+                  </Button>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Center - Tab Navigation */}
-          <div className="flex items-center">
-            <div className="bg-gray-100 rounded-lg p-1 flex">
-              <button
-                onClick={() => setActiveTab('editor')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'editor'
-                    ? 'bg-white text-purple-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                <Edit3 className="w-4 h-4 mr-2 inline" />
-                Editor Visual
-              </button>
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'settings'
-                    ? 'bg-white text-purple-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                <Settings className="w-4 h-4 mr-2 inline" />
-                Configurações
-              </button>
-            </div>
-          </div>
-
-          {/* Right side - Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Site status */}
-            {couple && (
-              <div className="flex items-center space-x-2 text-sm">
-                <div className={`w-2 h-2 rounded-full ${(couple as any).is_published ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                <span className="text-gray-600">
-                  {(couple as any).is_published ? 'Publicado' : 'Rascunho'}
-                </span>
-              </div>
-            )}
-
-            {/* Publish button */}
-            <Button
-              onClick={handlePublishSite}
-              disabled={isPublishing || !couple}
-              className="bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
+          {/* Status message */}
+          {publishMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`border-b px-4 py-2 ${
+                publishMessage.includes('✅') 
+                  ? 'bg-green-50 border-green-200 text-green-800' 
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
             >
-              {isPublishing ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Publicando...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Publicar Site
-                </>
-              )}
-            </Button>
+              <p className="text-sm font-medium">{publishMessage}</p>
+            </motion.div>
+          )}
+        </motion.header>
 
-            {/* View site & copy link */}
-            {(couple as any)?.is_published && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(`/${couple.slug}`, '_blank')}
-                >
-                  Ver Site
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/${couple.slug}`)
-                    setPublishMessage('✅ Link copiado para a área de transferência!')
-                    setTimeout(() => setPublishMessage(''), 2000)
-                  }}
-                >
-                  Copiar Link
-                </Button>
+
+
+        {/* Main Content - Full Screen */}
+        <main className="pt-16 min-h-screen">
+          {/* Content Area */}
+          {activeTab === 'editor' && couple && (
+            <div className="h-[calc(100vh-4rem)]">
+              <TemplateRenderer
+                coupleData={couple}
+                isEditable={true}
+                onSectionUpdate={handleSectionUpdate}
+              />
+            </div>
+          )}
+
+          {activeTab === 'editor' && !couple && (
+            <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
+              <div className="text-center">
+                <Edit3 className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Carregando Editor...
+                </h3>
+                <p className="text-gray-600">
+                  Preparando seu editor visual com dados reais...
+                </p>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Status message */}
-        {publishMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`border-b px-4 py-2 ${
-              publishMessage.includes('✅') 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}
-          >
-            <p className="text-sm font-medium">{publishMessage}</p>
-          </motion.div>
-        )}
-      </motion.header>
-
-
-
-      {/* Main Content - Full Screen */}
-      <main className="pt-16 min-h-screen">
-        {/* Content Area */}
-        {activeTab === 'editor' && couple && (
-          <div className="h-[calc(100vh-4rem)]">
-            <TemplateRenderer
-              coupleData={couple}
-              isEditable={true}
-              onSectionUpdate={handleSectionUpdate}
-            />
-          </div>
-        )}
-
-        {activeTab === 'editor' && !couple && (
-          <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
-            <div className="text-center">
-              <Edit3 className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Carregando Editor...
-              </h3>
-              <p className="text-gray-600">
-                Preparando seu editor visual com dados reais...
-              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'settings' && (
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto bg-white">
-            <div className="max-w-4xl mx-auto p-6">
-              <SettingsForm initialCouple={couple} />
+          {activeTab === 'settings' && (
+            <div className="h-[calc(100vh-4rem)] overflow-y-auto bg-white">
+              <div className="max-w-4xl mx-auto p-6">
+                <SettingsForm initialCouple={couple} />
+              </div>
             </div>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }

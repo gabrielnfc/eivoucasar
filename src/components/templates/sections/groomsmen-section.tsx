@@ -6,6 +6,7 @@ import { Heart, Users, Crown, Star, Plus, Edit3, Trash2, User } from 'lucide-rea
 import { TemplateSection, WeddingTemplate, GroomsmenSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface GroomsmenSectionProps {
   section: TemplateSection;
@@ -22,6 +23,7 @@ export function GroomsmenSection({
 }: GroomsmenSectionProps) {
   const data = section.data as GroomsmenSectionData;
   const [activeTab, setActiveTab] = useState<'groomsmen' | 'bridesmaids'>('groomsmen');
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -71,17 +73,16 @@ export function GroomsmenSection({
       layout
     >
       <div
-        className="relative overflow-hidden rounded-2xl shadow-lg border-2 bg-white/90 backdrop-blur-sm transition-all duration-300 group-hover:shadow-2xl"
+        className="relative overflow-hidden rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm transition-all duration-300 group-hover:shadow-2xl"
         style={{
-          borderColor: `${template.colors.primary}20`,
-          boxShadow: `0 10px 30px -5px ${template.colors.primary}20`
+          boxShadow: `0 15px 35px -10px ${themeStyles.primary}15`
         }}
       >
         {/* Gradient Overlay */}
         <div
           className="absolute top-0 left-0 right-0 h-32 opacity-10"
           style={{
-            background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+            background: themeStyles.secondaryGradient
           }}
         />
 
@@ -108,22 +109,23 @@ export function GroomsmenSection({
               </>
             ) : (
               <div 
-                className="w-full h-full rounded-full border-4 border-dashed flex items-center justify-center bg-gray-50"
-                style={{ borderColor: template.colors.primary + '40' }}
+                className="w-full h-full rounded-full border-dashed border-2 border-gray-300 flex flex-col items-center justify-center gap-4 bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-all duration-300"
+                style={{ borderColor: themeStyles.primary + '40' }}
               >
                 <User 
                   className="w-8 h-8 opacity-40"
-                  style={{ color: template.colors.primary }}
+                  style={{ color: themeStyles.primary }}
                 />
               </div>
             )}
 
             {/* Role Badge */}
             <div
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium border-2 border-white shadow-md"
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium shadow-md"
               style={{
-                backgroundColor: template.colors.primary,
-                color: 'white'
+                backgroundColor: 'white',
+                color: themeStyles.primary,
+                boxShadow: `0 4px 12px -2px ${themeStyles.primary}30`
               }}
             >
               {type === 'groomsmen' ? (
@@ -147,8 +149,8 @@ export function GroomsmenSection({
                 onSave={(value) => onFieldUpdate(`${type}.${index}.name`, String(value))}
                 className="text-lg font-bold"
                 style={{
-                  fontFamily: template.fonts.heading,
-                  color: template.colors.text,
+                  fontFamily: themeStyles.fontSecondary,
+                  color: themeStyles.text,
                 }}
                 template={template}
               />
@@ -156,8 +158,8 @@ export function GroomsmenSection({
               <h4
                 className="text-lg font-bold"
                 style={{
-                  fontFamily: template.fonts.heading,
-                  color: template.colors.text,
+                  fontFamily: themeStyles.fontSecondary,
+                  color: themeStyles.text,
                 }}
               >
                 {person.name?.value}
@@ -174,8 +176,8 @@ export function GroomsmenSection({
                 onSave={(value) => onFieldUpdate(`${type}.${index}.description`, String(value))}
                 className="text-sm leading-relaxed"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
                 template={template}
               />
@@ -183,8 +185,8 @@ export function GroomsmenSection({
               <p
                 className="text-sm leading-relaxed"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
               >
                 {person.description?.value}
@@ -215,7 +217,7 @@ export function GroomsmenSection({
         <div className="absolute top-4 right-4 opacity-20">
           <Heart 
             className="w-5 h-5"
-            style={{ color: template.colors.primary }}
+            style={{ color: themeStyles.primary }}
           />
         </div>
       </div>
@@ -230,8 +232,8 @@ export function GroomsmenSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Pattern */}
@@ -239,7 +241,7 @@ export function GroomsmenSection({
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${template.colors.primary.replace('#', '')}' fill-opacity='0.08'%3E%3Cpath d='M40 40c8.837 0 16-7.163 16-16S48.837 8 40 8 24 15.163 24 24s7.163 16 16 16zm0-4c6.627 0 12-5.373 12-12S46.627 12 40 12s-12 5.373-12 12 5.373 12 12 12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${themeStyles.primary.replace('#', '')}' fill-opacity='0.08'%3E%3Cpath d='M40 40c8.837 0 16-7.163 16-16S48.837 8 40 8 24 15.163 24 24s7.163 16 16 16zm0-4c6.627 0 12-5.373 12-12S46.627 12 40 12s-12 5.373-12 12 5.373 12 12 12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
       </div>
@@ -257,11 +259,8 @@ export function GroomsmenSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -269,11 +268,8 @@ export function GroomsmenSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -287,8 +283,8 @@ export function GroomsmenSection({
               onSave={(value) => onFieldUpdate('subtitle', String(value))}
               className="text-lg md:text-xl max-w-2xl mx-auto"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -296,8 +292,8 @@ export function GroomsmenSection({
             <p
               className="text-lg md:text-xl max-w-2xl mx-auto"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {data.subtitle?.value || ''}
@@ -307,7 +303,7 @@ export function GroomsmenSection({
           <motion.div
             className="w-24 h-1 mx-auto mt-6 rounded-full"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.secondaryGradient
             }}
             variants={itemVariants}
           />
@@ -330,7 +326,7 @@ export function GroomsmenSection({
                 )}
                 style={{
                   background: activeTab === 'groomsmen' 
-                    ? `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                    ? themeStyles.primaryGradient
                     : 'transparent'
                 }}
               >
@@ -347,7 +343,7 @@ export function GroomsmenSection({
                 )}
                 style={{
                   background: activeTab === 'bridesmaids' 
-                    ? `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                    ? themeStyles.primaryGradient
                     : 'transparent'
                 }}
               >
@@ -383,30 +379,30 @@ export function GroomsmenSection({
             >
               <motion.button
                 onClick={() => addNewPerson(activeTab)}
-                className="w-full h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-all duration-300"
-                style={{ borderColor: template.colors.primary + '40' }}
+                className="w-full h-full border-dashed border-2 border-gray-300 rounded-2xl flex flex-col items-center justify-center gap-4 bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-all duration-300"
+                style={{ borderColor: themeStyles.primary + '40' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: template.colors.primary + '20' }}
+                  style={{ backgroundColor: themeStyles.primary + '20' }}
                 >
                   <Plus 
                     className="w-8 h-8"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   />
                 </div>
                 <div className="text-center">
                   <p
                     className="font-medium mb-1"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   >
                     Adicionar {activeTab === 'groomsmen' ? 'Padrinho' : 'Madrinha'}
                   </p>
                   <p
                     className="text-sm opacity-70"
-                    style={{ color: template.colors.textSecondary }}
+                    style={{ color: themeStyles.textSecondary }}
                   >
                     Clique para adicionar
                   </p>
@@ -430,7 +426,7 @@ export function GroomsmenSection({
             <div
               className="w-20 h-px opacity-30"
               style={{
-                background: `linear-gradient(to right, transparent, ${template.colors.primary})`
+                background: `linear-gradient(to right, transparent, ${themeStyles.primary})`
               }}
             />
             
@@ -447,13 +443,13 @@ export function GroomsmenSection({
             >
               <Users 
                 className="w-6 h-6"
-                style={{ color: template.colors.primary }}
+                style={{ color: themeStyles.primary }}
               />
               <span
                 className="text-sm font-medium"
                 style={{ 
-                  color: template.colors.primary,
-                  fontFamily: template.fonts.body 
+                  color: themeStyles.primary,
+                  fontFamily: themeStyles.fontPrimary 
                 }}
               >
                 Nossos Queridos
@@ -463,7 +459,7 @@ export function GroomsmenSection({
             <div
               className="w-20 h-px opacity-30"
               style={{
-                background: `linear-gradient(to left, transparent, ${template.colors.primary})`
+                background: `linear-gradient(to left, transparent, ${themeStyles.primary})`
               }}
             />
           </motion.div>

@@ -1,193 +1,199 @@
-'use client';
+'use client'
 
-// ===============================================
-// EICASEI - NAVBAR COMPONENT
-// ===============================================
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Menu, X, LogOut, User, Settings } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Logo from '@/components/ui/logo'
+import { useAuth } from '@/contexts/auth-context'
 
-import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
-import { useAuth } from '@/contexts/auth-context';
-import { Button } from '@/components/ui/button';
-import Logo from '@/components/ui/logo';
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false)
+  // Navbar não deve forçar verificação de auth - apenas verificar passivamente
+  const { user, loading, signOut } = useAuth()
+  const router = useRouter()
 
-interface NavbarProps {
-	currentPage?: 'home' | 'pricing' | 'features' | 'about';
-	variant?: 'default' | 'transparent';
-}
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+    }
+  }
 
-export default function Navbar({
-	currentPage = 'home',
-	variant = 'default',
-}: NavbarProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const { user, loading } = useAuth();
+  return (
+    <nav className="bg-white/95 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/">
+              <Logo size="lg" />
+            </Link>
+          </div>
 
-	const baseClasses =
-		variant === 'transparent'
-			? 'bg-white/80 backdrop-blur-sm dark:bg-neutral-900/80'
-			: 'bg-white dark:bg-neutral-900';
+          {/* Desktop Navigation */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-4">
+              <Link
+                href="/#features"
+                className="text-secondary-600 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Funcionalidades
+              </Link>
+              <Link
+                href="/#pricing"
+                className="text-secondary-600 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Preços
+              </Link>
+              <Link
+                href="/#examples"
+                className="text-secondary-600 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Exemplos
+              </Link>
+            </div>
+          </div>
 
-	const isActive = (page: string) => currentPage === page;
+          {/* User Actions */}
+          <div className="hidden md:block">
+            <div className="ml-4 flex items-center md:ml-6">
+              {!loading && user ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-secondary-600">
+                    Olá, {user.brideName || user.groomName || user.email}
+                  </span>
+                  <Link href="/dashboard">
+                    <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={handleLogout}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center space-x-2 text-secondary-600 hover:text-secondary-800"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm">
+                      Entrar
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button size="sm" className="bg-primary-500 hover:bg-primary-600 text-white">
+                      Começar Grátis
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
 
-	return (
-		<header
-			className={`border-b border-neutral-200 dark:border-neutral-700 ${baseClasses}`}
-		>
-			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<div className="flex h-16 items-center justify-between">
-					{/* Logo */}
-					<Link href="/" className="hover:opacity-80 transition-opacity">
-						<Logo size="lg" />
-					</Link>
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-secondary-600 hover:text-primary-500 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+            >
+              {isOpen ? (
+                <X className="block h-6 w-6" />
+              ) : (
+                <Menu className="block h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
 
-					{/* Desktop Navigation */}
-					<nav className="hidden md:flex items-center space-x-8">
-						<Link
-							href="/"
-							className={`transition-colors ${
-								isActive('home')
-									? 'text-primary-500 font-medium'
-									: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white'
-							}`}
-						>
-							Início
-						</Link>
-						<Link
-							href="/#features"
-							className={`transition-colors ${
-								isActive('features')
-									? 'text-primary-500 font-medium'
-									: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white'
-							}`}
-						>
-							Funcionalidades
-						</Link>
-						<Link
-							href="/pricing"
-							className={`transition-colors ${
-								isActive('pricing')
-									? 'text-primary-500 font-medium'
-									: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white'
-							}`}
-						>
-							Preços
-						</Link>
-
-						{/* Auth Links */}
-						{!loading && (
-							<>
-								{user ? (
-									<Button asChild size="sm">
-										<Link href="/dashboard">Dashboard</Link>
-									</Button>
-								) : (
-									<>
-										<Link
-											href="/login"
-											className="text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white transition-colors"
-										>
-											Entrar
-										</Link>
-										<Button asChild size="sm">
-											<Link href="/signup">Começar Grátis</Link>
-										</Button>
-									</>
-								)}
-							</>
-						)}
-					</nav>
-
-					{/* Mobile menu button */}
-					<div className="md:hidden">
-						<button
-							onClick={() => setIsOpen(!isOpen)}
-							className="inline-flex items-center justify-center p-2 rounded-md text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white transition-colors"
-						>
-							{isOpen ? (
-								<X className="block h-6 w-6" />
-							) : (
-								<Menu className="block h-6 w-6" />
-							)}
-						</button>
-					</div>
-				</div>
-
-				{/* Mobile menu */}
-				{isOpen && (
-					<div className="md:hidden">
-						<div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-neutral-200 dark:border-neutral-700">
-							<Link
-								href="/"
-								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-									isActive('home')
-										? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20'
-										: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800'
-								}`}
-								onClick={() => setIsOpen(false)}
-							>
-								Início
-							</Link>
-							<Link
-								href="/#features"
-								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-									isActive('features')
-										? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20'
-										: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800'
-								}`}
-								onClick={() => setIsOpen(false)}
-							>
-								Funcionalidades
-							</Link>
-							<Link
-								href="/pricing"
-								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-									isActive('pricing')
-										? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20'
-										: 'text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800'
-								}`}
-								onClick={() => setIsOpen(false)}
-							>
-								Preços
-							</Link>
-
-							{/* Mobile Auth Links */}
-							<div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-								{!loading && (
-									<>
-										{user ? (
-											<Link
-												href="/dashboard"
-												className="block px-3 py-2 rounded-md text-base font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
-												onClick={() => setIsOpen(false)}
-											>
-												Dashboard
-											</Link>
-										) : (
-											<>
-												<Link
-													href="/login"
-													className="block px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-													onClick={() => setIsOpen(false)}
-												>
-													Entrar
-												</Link>
-												<Link
-													href="/signup"
-													className="block px-3 py-2 rounded-md text-base font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
-													onClick={() => setIsOpen(false)}
-												>
-													Começar Grátis
-												</Link>
-											</>
-										)}
-									</>
-								)}
-							</div>
-						</div>
-					</div>
-				)}
-			</div>
-		</header>
-	);
+      {/* Mobile menu */}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="md:hidden"
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-neutral-200">
+            <Link
+              href="/#features"
+              className="text-secondary-600 hover:text-primary-500 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Funcionalidades
+            </Link>
+            <Link
+              href="/#pricing"
+              className="text-secondary-600 hover:text-primary-500 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Preços
+            </Link>
+            <Link
+              href="/#examples"
+              className="text-secondary-600 hover:text-primary-500 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Exemplos
+            </Link>
+            
+            {/* Mobile User Actions */}
+            <div className="pt-4 pb-3 border-t border-neutral-200">
+              {!loading && user ? (
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-center px-3">
+                    <div className="flex-shrink-0">
+                      <User className="h-8 w-8 text-secondary-400" />
+                    </div>
+                    <div className="ml-3">
+                      <div className="text-base font-medium text-secondary-800">
+                        {user.brideName || user.groomName || user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => {
+                      handleLogout()
+                      setIsOpen(false)
+                    }}
+                    variant="ghost"
+                    className="w-full text-secondary-600"
+                  >
+                    Sair
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      Entrar
+                    </Button>
+                  </Link>
+                  <Link href="/signup" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full bg-primary-500 hover:bg-primary-600 text-white">
+                      Começar Grátis
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </nav>
+  )
 }

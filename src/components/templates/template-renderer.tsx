@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { WeddingTemplate, TemplateSection } from '@/types/template';
 import { createRealTemplate } from '@/lib/create-real-template';
 import { 
+  HeroSection,
   InvitationSection,
   CountdownSection, 
   StorySection,
@@ -53,6 +54,7 @@ interface TemplateRendererProps {
 
 // Mapeamento de tipos de seções para componentes
 const SECTION_COMPONENTS = {
+  hero: HeroSection,
   invitation: InvitationSection,
   countdown: CountdownSection,
   story: StorySection,
@@ -125,7 +127,7 @@ export function TemplateRenderer({
         apiUrl = `/api/couples?user_id=${coupleId}`;
       } else {
         console.log('🔍 TemplateRenderer: Buscando dados por slug:', slug);
-        apiUrl = `/api/couples/${slug}`;
+        apiUrl = `/api/public/couples/${slug}`;
       }
       
       const response = await fetch(apiUrl);
@@ -166,7 +168,7 @@ export function TemplateRenderer({
     
     // Se não estiver no modo edição, podemos salvar diretamente na API
     if (!isEditable && coupleId) {
-      // Em produção, fazer POST para /api/couples/[id]/template
+              // Em produção, fazer POST para /api/couples/[coupleId]/template
       console.log('Saving to API:', { coupleId, sectionId, fieldId, value });
     }
   };
@@ -243,7 +245,7 @@ export function TemplateRenderer({
               <li><strong>Slug usado:</strong> {slug || 'Não fornecido'}</li>
               <li><strong>Template inicial:</strong> {initialTemplate ? 'Fornecido' : 'Não fornecido'}</li>
               <li><strong>Método:</strong> {coupleData ? 'Dados diretos' : coupleId ? 'API por user_id' : 'API por slug'}</li>
-              <li><strong>URL da API:</strong> {coupleData ? 'N/A (dados diretos)' : coupleId ? `/api/couples?user_id=${coupleId}` : `/api/couples/${slug}`}</li>
+              <li><strong>URL da API:</strong> {coupleData ? 'N/A (dados diretos)' : coupleId ? `/api/couples?user_id=${coupleId}` : `/api/public/couples/${slug}`}</li>
             </ul>
           </div>
           
@@ -283,24 +285,29 @@ export function TemplateRenderer({
 
   return (
     <div className={`template-renderer ${isEditable ? 'editor-mode' : ''}`}>
-      {/* Template Styles */}
+      {/* Template Styles - Usando CSS custom properties do tema */}
       <style jsx global>{`
-        :root {
-          --template-primary: ${template.colors.primary};
-          --template-secondary: ${template.colors.secondary};
-          --template-accent: ${template.colors.accent};
-          --template-background: ${template.colors.background};
-          --template-text: ${template.colors.text};
-          --template-text-secondary: ${template.colors.textSecondary};
+        .template-renderer {
+          /* Fallback para cores do template, mas prioridade para tema */
+          --template-primary: var(--theme-primary, ${template.colors.primary});
+          --template-secondary: var(--theme-secondary, ${template.colors.secondary});
+          --template-accent: var(--theme-accent, ${template.colors.accent});
+          --template-background: var(--theme-background, ${template.colors.background});
+          --template-text: var(--theme-text, ${template.colors.text});
+          --template-text-secondary: var(--theme-text-secondary, ${template.colors.textSecondary});
           --template-success: ${template.colors.success};
           --template-warning: ${template.colors.warning};
           --template-error: ${template.colors.error};
-        }
-        
-        .template-renderer {
-          font-family: ${template.fonts.body};
-          color: ${template.colors.text};
-          background-color: ${template.colors.background};
+          
+          /* Fontes do tema */
+          --template-font-primary: var(--theme-font-primary, ${template.fonts.body});
+          --template-font-secondary: var(--theme-font-secondary, ${template.fonts.heading});
+          --template-font-accent: var(--theme-font-accent, ${template.fonts.script});
+          
+          /* Aplicar propriedades */
+          font-family: var(--template-font-primary);
+          color: var(--template-text);
+          background-color: var(--template-background);
         }
         
         .template-renderer h1,
@@ -309,11 +316,11 @@ export function TemplateRenderer({
         .template-renderer h4,
         .template-renderer h5,
         .template-renderer h6 {
-          font-family: ${template.fonts.heading};
+          font-family: var(--template-font-secondary);
         }
         
         .template-script {
-          font-family: ${template.fonts.script};
+          font-family: var(--template-font-accent);
         }
         
         /* Editor mode styles */

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { TemplateSection, WeddingTemplate, CountdownSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import WeddingCountdownAnimated from '@/components/wedding/wedding-countdown-animated';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface CountdownSectionProps {
   section: TemplateSection;
@@ -20,6 +21,7 @@ export function CountdownSection({
   onFieldUpdate
 }: CountdownSectionProps) {
   const data = section.data as CountdownSectionData;
+  const themeStyles = getThemeStyles(template);
 
   return (
     <motion.section
@@ -28,8 +30,8 @@ export function CountdownSection({
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -37,8 +39,8 @@ export function CountdownSection({
         <div
           className="absolute inset-0 opacity-10"
           style={{
-            background: `radial-gradient(circle at 30% 70%, ${template.colors.primary}, transparent 50%),
-                        radial-gradient(circle at 70% 30%, ${template.colors.secondary}, transparent 50%)`
+            background: `radial-gradient(circle at 30% 70%, ${themeStyles.primary}, transparent 50%),
+                        radial-gradient(circle at 70% 30%, ${themeStyles.secondary}, transparent 50%)`
           }}
         />
       </div>
@@ -53,11 +55,8 @@ export function CountdownSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -65,11 +64,8 @@ export function CountdownSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -92,8 +88,8 @@ export function CountdownSection({
               onSave={(value) => onFieldUpdate('targetDate', String(value))}
               className="text-lg font-medium text-gray-600"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -101,8 +97,8 @@ export function CountdownSection({
             <p
               className="text-lg font-medium"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {new Date(data.targetDate.value).toLocaleDateString('pt-BR', {

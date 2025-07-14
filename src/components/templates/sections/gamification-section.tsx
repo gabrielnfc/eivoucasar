@@ -6,6 +6,7 @@ import { Trophy, Target, Users, Heart, Crown, Medal, Gift, Copy, Check, Trending
 import { TemplateSection, WeddingTemplate, GamificationSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface GamificationSectionProps {
   section: TemplateSection;
@@ -23,6 +24,7 @@ export function GamificationSection({
   const data = section.data as GamificationSectionData;
   const [copiedPix, setCopiedPix] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const themeStyles = getThemeStyles(template);
 
   // Mock data para demonstração (em produção viria do backend)
   const mockLeaderboard = [
@@ -95,8 +97,8 @@ export function GamificationSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -105,9 +107,9 @@ export function GamificationSection({
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            background: `radial-gradient(circle at 20% 80%, ${template.colors.primary}, transparent 50%),
-                        radial-gradient(circle at 80% 20%, ${template.colors.secondary}, transparent 50%),
-                        radial-gradient(circle at 40% 40%, ${template.colors.accent}, transparent 50%)`
+            background: `radial-gradient(circle at 20% 80%, ${themeStyles.primary}, transparent 50%),
+                        radial-gradient(circle at 80% 20%, ${themeStyles.secondary}, transparent 50%),
+                        radial-gradient(circle at 40% 40%, ${themeStyles.accent}, transparent 50%)`
           }}
         />
 
@@ -151,11 +153,8 @@ export function GamificationSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -163,11 +162,8 @@ export function GamificationSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -181,8 +177,8 @@ export function GamificationSection({
               onSave={(value) => onFieldUpdate('subtitle', String(value))}
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -190,8 +186,8 @@ export function GamificationSection({
             <p
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {data.subtitle?.value || ''}
@@ -201,7 +197,7 @@ export function GamificationSection({
           <motion.div
             className="w-32 h-1 mx-auto rounded-full"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             variants={itemVariants}
           />
@@ -213,10 +209,9 @@ export function GamificationSection({
           variants={itemVariants}
         >
           <div
-            className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 max-w-4xl mx-auto"
+                          className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto"
             style={{
-              borderColor: `${template.colors.primary}20`,
-              boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+              boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
             }}
           >
             {/* Goal Header */}
@@ -224,13 +219,13 @@ export function GamificationSection({
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Target 
                   className="w-8 h-8"
-                  style={{ color: template.colors.primary }}
+                  style={{ color: themeStyles.primary }}
                 />
                 <h3
                   className="text-2xl md:text-3xl font-bold"
                   style={{
-                    fontFamily: template.fonts.heading,
-                    color: template.colors.primary,
+                    fontFamily: themeStyles.fontSecondary,
+                    color: themeStyles.primary,
                   }}
                 >
                   Meta da Lua de Mel
@@ -241,13 +236,13 @@ export function GamificationSection({
                 <div className="text-center">
                   <p
                     className="text-3xl md:text-4xl font-bold"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   >
                     R$ {totalRaised.toLocaleString('pt-BR')}
                   </p>
                   <p
                     className="text-sm opacity-70"
-                    style={{ color: template.colors.textSecondary }}
+                    style={{ color: themeStyles.textSecondary }}
                   >
                     Arrecadado
                   </p>
@@ -256,13 +251,13 @@ export function GamificationSection({
                 <div className="text-center">
                   <p
                     className="text-xl font-medium opacity-70"
-                    style={{ color: template.colors.textSecondary }}
+                    style={{ color: themeStyles.textSecondary }}
                   >
                     R$ {data.totalGoal.toLocaleString('pt-BR')}
                   </p>
                   <p
                     className="text-sm opacity-70"
-                    style={{ color: template.colors.textSecondary }}
+                    style={{ color: themeStyles.textSecondary }}
                   >
                     Meta Total
                   </p>
@@ -278,7 +273,7 @@ export function GamificationSection({
                 <motion.div
                   className="h-full rounded-full"
                   style={{
-                    background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+                    background: themeStyles.primaryGradient
                   }}
                   initial={{ width: 0 }}
                   whileInView={{ width: `${progressPercentage}%` }}
@@ -298,8 +293,8 @@ export function GamificationSection({
               <p
                 className="text-lg font-medium mb-4"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.text,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.text,
                 }}
               >
                 Contribua via PIX:
@@ -314,14 +309,14 @@ export function GamificationSection({
                     className="bg-gray-100 px-4 py-2 rounded-lg font-mono text-sm"
                     style={{
                       fontFamily: 'monospace',
-                      color: template.colors.text,
+                      color: themeStyles.text,
                     }}
                     template={template}
                   />
                 ) : (
                   <div
                     className="bg-gray-100 px-4 py-2 rounded-lg font-mono text-sm"
-                    style={{ color: template.colors.text }}
+                    style={{ color: themeStyles.text }}
                   >
                     {data.pixKey.value || 'chave-pix@exemplo.com'}
                   </div>
@@ -331,7 +326,7 @@ export function GamificationSection({
                   onClick={copyPixKey}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300"
                   style={{
-                    backgroundColor: template.colors.primary,
+                    backgroundColor: themeStyles.primary,
                     color: 'white'
                   }}
                   whileHover={{ scale: 1.05 }}
@@ -368,8 +363,8 @@ export function GamificationSection({
               <h3
                 className="text-2xl md:text-3xl font-bold mb-2"
                 style={{
-                  fontFamily: template.fonts.heading,
-                  color: template.colors.primary,
+                  fontFamily: themeStyles.fontSecondary,
+                  color: themeStyles.primary,
                 }}
               >
                 🏆 Ranking dos Grupos
@@ -377,8 +372,8 @@ export function GamificationSection({
               <p
                 className="text-base opacity-80"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
               >
                 Qual grupo contribuiu mais?
@@ -396,11 +391,11 @@ export function GamificationSection({
                 >
                   <div
                     className={cn(
-                      "bg-white/90 backdrop-blur-sm rounded-2xl p-4 border-2 shadow-lg transition-all duration-300",
+                      "bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg transition-all duration-300",
                       selectedGroup === index ? "scale-105" : "hover:shadow-xl"
                     )}
                     style={{
-                      borderColor: selectedGroup === index ? template.colors.primary : `${template.colors.accent}30`
+                      borderColor: selectedGroup === index ? themeStyles.primary : `${themeStyles.accent}30`
                     }}
                   >
                     <div className="flex items-center gap-4">
@@ -421,8 +416,8 @@ export function GamificationSection({
                           <h4
                             className="font-bold text-lg"
                             style={{
-                              fontFamily: template.fonts.heading,
-                              color: template.colors.text,
+                              fontFamily: themeStyles.fontSecondary,
+                              color: themeStyles.text,
                             }}
                           >
                             {group.name}
@@ -445,13 +440,13 @@ export function GamificationSection({
                       <div className="text-right">
                         <p
                           className="text-2xl font-bold"
-                          style={{ color: template.colors.primary }}
+                          style={{ color: themeStyles.primary }}
                         >
                           R$ {group.amount.toLocaleString('pt-BR')}
                         </p>
                         <p
                           className="text-sm opacity-70"
-                          style={{ color: template.colors.textSecondary }}
+                          style={{ color: themeStyles.textSecondary }}
                         >
                           {((group.amount / totalRaised) * 100).toFixed(1)}%
                         </p>
@@ -464,7 +459,7 @@ export function GamificationSection({
                         <motion.div
                           className="h-full rounded-full"
                           style={{
-                            background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+                            background: themeStyles.primaryGradient
                           }}
                           initial={{ width: 0 }}
                           whileInView={{ width: `${(group.amount / Math.max(...mockLeaderboard.map(g => g.amount))) * 100}%` }}
@@ -487,8 +482,8 @@ export function GamificationSection({
               <h3
                 className="text-2xl md:text-3xl font-bold mb-2"
                 style={{
-                  fontFamily: template.fonts.heading,
-                  color: template.colors.primary,
+                  fontFamily: themeStyles.fontSecondary,
+                  color: themeStyles.primary,
                 }}
               >
                 🎯 Conquistas
@@ -496,8 +491,8 @@ export function GamificationSection({
               <p
                 className="text-base opacity-80"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
               >
                 Marcos alcançados
@@ -516,11 +511,11 @@ export function GamificationSection({
                 <motion.div
                   key={index}
                   className={cn(
-                    "bg-white/90 backdrop-blur-sm rounded-xl p-4 border-2 transition-all duration-300",
+                    "bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-md transition-all duration-300",
                     achievement.achieved ? "opacity-100" : "opacity-50"
                   )}
                   style={{
-                    borderColor: achievement.achieved ? `${template.colors.primary}40` : `${template.colors.accent}20`
+                    borderColor: achievement.achieved ? `${themeStyles.primary}40` : `${themeStyles.accent}20`
                   }}
                   variants={leaderboardVariants}
                 >
@@ -537,8 +532,8 @@ export function GamificationSection({
                       <h4
                         className="font-bold"
                         style={{
-                          fontFamily: template.fonts.heading,
-                          color: achievement.achieved ? template.colors.text : template.colors.textSecondary,
+                          fontFamily: themeStyles.fontSecondary,
+                          color: achievement.achieved ? themeStyles.text : themeStyles.textSecondary,
                         }}
                       >
                         {achievement.title}
@@ -546,8 +541,8 @@ export function GamificationSection({
                       <p
                         className="text-sm opacity-80"
                         style={{
-                          fontFamily: template.fonts.body,
-                          color: template.colors.textSecondary,
+                          fontFamily: themeStyles.fontPrimary,
+                          color: themeStyles.textSecondary,
                         }}
                       >
                         {achievement.desc}
@@ -583,22 +578,21 @@ export function GamificationSection({
           variants={itemVariants}
         >
           <motion.div
-            className="max-w-2xl mx-auto bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2"
+                          className="max-w-2xl mx-auto bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl"
             style={{
-              borderColor: `${template.colors.primary}20`,
-              boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+              boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
             }}
           >
             <div className="mb-6">
               <Gift 
                 className="w-16 h-16 mx-auto mb-4"
-                style={{ color: template.colors.primary }}
+                style={{ color: themeStyles.primary }}
               />
               <h3
                 className="text-2xl font-bold mb-2"
                 style={{
-                  fontFamily: template.fonts.heading,
-                  color: template.colors.primary,
+                  fontFamily: themeStyles.fontSecondary,
+                  color: themeStyles.primary,
                 }}
               >
                 Faça Parte da Nossa Jornada! 💕
@@ -606,8 +600,8 @@ export function GamificationSection({
               <p
                 className="text-lg opacity-90"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
               >
                 Sua contribuição nos ajuda a realizar o sonho da lua de mel perfeita!
@@ -617,7 +611,7 @@ export function GamificationSection({
             <motion.button
               className="px-8 py-4 rounded-full text-white font-bold text-lg shadow-lg transition-all duration-300"
               style={{
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                background: themeStyles.primaryGradient
               }}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}

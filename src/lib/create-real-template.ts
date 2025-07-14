@@ -66,6 +66,50 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
     },
     sections: [
       {
+        id: 'hero',
+        name: 'Hero',
+        type: 'hero',
+        component: 'HeroSection',
+        editable: true,
+        required: true,
+        order: 0,
+        enabled: true,
+        layout: {
+          type: 'full',
+          background: 'image',
+          padding: 'none',
+          alignment: 'center',
+          spacing: 'normal'
+        },
+        style: {
+          backgroundColor: '#000000',
+          textColor: '#ffffff'
+        },
+        data: {
+          brideName: { id: 'brideName', type: 'text', value: coupleData.brideName },
+          groomName: { id: 'groomName', type: 'text', value: coupleData.groomName },
+          weddingDate: { 
+            id: 'weddingDate', 
+            type: 'text', 
+            value: new Date(coupleData.weddingDateTime).toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+          },
+          location: { id: 'location', type: 'text', value: locationText },
+          subtitle: { id: 'subtitle', type: 'text', value: 'Celebre conosco este momento único e especial' },
+          backgroundImage: { id: 'backgroundImage', type: 'image', value: coupleData.coverPhotoUrl || '' }
+        },
+        settings: {
+          showTitle: false,
+          showSubtitle: true,
+          showDivider: false,
+          animation: 'fade'
+        }
+      },
+      {
         id: 'invitation',
         name: 'Convite',
         type: 'invitation',

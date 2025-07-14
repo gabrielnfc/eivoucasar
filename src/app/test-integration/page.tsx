@@ -15,7 +15,7 @@ export default function TestIntegrationPage() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch(`/api/couples/${testSlug}`)
+      const response = await fetch(`/api/public/couples/${testSlug}`)
       const result = await response.json()
       
       if (result.success) {
@@ -155,7 +155,7 @@ export default function TestIntegrationPage() {
             <div className="text-center">
               <div className="text-2xl">✅</div>
               <div className="text-sm font-medium">API Criada</div>
-              <div className="text-xs text-gray-600">/api/couples/[slug]</div>
+              <div className="text-xs text-gray-600">/api/public/couples/[slug]</div>
             </div>
             <div className="text-center">
               <div className="text-2xl">✅</div>

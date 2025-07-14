@@ -40,6 +40,7 @@ import {
 import { TemplateSection, WeddingTemplate, DetailsSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface DetailsSectionProps {
   section: TemplateSection;
@@ -71,6 +72,7 @@ export function DetailsSection({
   const data = section.data as DetailsSectionData;
   const [activeTab, setActiveTab] = useState<'dress-code' | 'timeline' | 'info' | 'contacts'>('dress-code');
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<number | null>(null);
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -100,42 +102,42 @@ export function DetailsSection({
       event: 'Chegada dos Convidados',
       description: 'Recepção e coquetel de boas-vindas',
       icon: <Users className="w-5 h-5" />,
-      color: template.colors.primary
+      color: themeStyles.primary
     },
     {
       time: '16:00',
       event: 'Cerimônia',
       description: 'Início da cerimônia de casamento',
       icon: <Heart className="w-5 h-5" />,
-      color: template.colors.secondary
+      color: themeStyles.secondary
     },
     {
       time: '16:30',
       event: 'Fotos & Cumprimentos',
       description: 'Sessão de fotos e cumprimentos aos noivos',
       icon: <Camera className="w-5 h-5" />,
-      color: template.colors.accent
+      color: themeStyles.accent
     },
     {
       time: '18:00',
       event: 'Jantar',
       description: 'Jantar festivo com entrada, prato principal e sobremesa',
       icon: <Utensils className="w-5 h-5" />,
-      color: template.colors.primary
+      color: themeStyles.primary
     },
     {
       time: '20:00',
       event: 'Primeira Dança',
       description: 'Abertura da pista com a primeira dança dos noivos',
       icon: <Music className="w-5 h-5" />,
-      color: template.colors.secondary
+      color: themeStyles.secondary
     },
     {
       time: '21:00',
       event: 'Festa',
       description: 'Música, dança e celebração até o amanhecer',
       icon: <PartyPopper className="w-5 h-5" />,
-      color: template.colors.accent
+      color: themeStyles.accent
     }
   ];
 
@@ -225,8 +227,8 @@ export function DetailsSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -235,9 +237,9 @@ export function DetailsSection({
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            background: `radial-gradient(circle at 20% 80%, ${template.colors.primary}, transparent 50%),
-                        radial-gradient(circle at 80% 20%, ${template.colors.secondary}, transparent 50%),
-                        radial-gradient(circle at 40% 40%, ${template.colors.accent}, transparent 50%)`
+            background: `radial-gradient(circle at 20% 80%, ${themeStyles.primary}, transparent 50%),
+                        radial-gradient(circle at 80% 20%, ${themeStyles.secondary}, transparent 50%),
+                        radial-gradient(circle at 40% 40%, ${themeStyles.accent}, transparent 50%)`
           }}
         />
 
@@ -281,11 +283,8 @@ export function DetailsSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -293,11 +292,8 @@ export function DetailsSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title?.value || ''}
@@ -307,7 +303,7 @@ export function DetailsSection({
           <motion.div
             className="w-32 h-1 mx-auto rounded-full mb-8"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             variants={itemVariants}
           />
@@ -315,8 +311,8 @@ export function DetailsSection({
           <p
             className="text-lg md:text-xl max-w-3xl mx-auto"
             style={{
-              fontFamily: template.fonts.body,
-              color: template.colors.textSecondary,
+              fontFamily: themeStyles.fontPrimary,
+              color: themeStyles.textSecondary,
             }}
           >
             Tudo o que você precisa saber para aproveitar nosso grande dia! 💕
@@ -340,12 +336,12 @@ export function DetailsSection({
               )}
               style={{
                 background: activeTab === tab.id 
-                  ? `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                  ? themeStyles.primaryGradient
                   : 'rgba(255,255,255,0.7)',
                 backdropFilter: 'blur(10px)',
                 border: activeTab === tab.id 
                   ? 'none' 
-                  : `1px solid ${template.colors.primary}30`
+                  : `1px solid ${themeStyles.primary}30`
               }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -371,23 +367,22 @@ export function DetailsSection({
               <div className="space-y-8">
                 {/* Dress Code Info */}
                 <div
-                  className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2"
+                  className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl"
                   style={{
-                    borderColor: `${template.colors.primary}20`,
-                    boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                    boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
                   }}
                 >
                   <div className="text-center mb-8">
                     <div className="flex items-center justify-center gap-3 mb-4">
                       <Shirt 
                         className="w-8 h-8"
-                        style={{ color: template.colors.primary }}
+                        style={{ color: themeStyles.primary }}
                       />
                       <h3
                         className="text-2xl md:text-3xl font-bold"
                         style={{
-                          color: template.colors.primary,
-                          fontFamily: template.fonts.heading
+                          color: themeStyles.primary,
+                          fontFamily: themeStyles.fontSecondary
                         }}
                       >
                         Dress Code
@@ -402,8 +397,8 @@ export function DetailsSection({
                           onSave={(value) => onFieldUpdate('dressCode', String(value))}
                           className="text-4xl font-bold mb-4"
                           style={{
-                            color: template.colors.primary,
-                            fontFamily: template.fonts.heading
+                            color: themeStyles.primary,
+                            fontFamily: themeStyles.fontSecondary
                           }}
                           template={template}
                         />
@@ -411,8 +406,8 @@ export function DetailsSection({
                         <p
                           className="text-4xl font-bold mb-4"
                           style={{
-                            color: template.colors.primary,
-                            fontFamily: template.fonts.heading
+                            color: themeStyles.primary,
+                            fontFamily: themeStyles.fontSecondary
                           }}
                         >
                           {data.dressCode?.value || ''}
@@ -426,8 +421,8 @@ export function DetailsSection({
                           onSave={(value) => onFieldUpdate('dressCodeDescription', String(value))}
                           className="text-lg max-w-2xl mx-auto"
                           style={{
-                            color: template.colors.textSecondary,
-                            fontFamily: template.fonts.body
+                            color: themeStyles.textSecondary,
+                            fontFamily: themeStyles.fontPrimary
                           }}
                           template={template}
                         />
@@ -435,8 +430,8 @@ export function DetailsSection({
                         <p
                           className="text-lg max-w-2xl mx-auto"
                           style={{
-                            color: template.colors.textSecondary,
-                            fontFamily: template.fonts.body
+                            color: themeStyles.textSecondary,
+                            fontFamily: themeStyles.fontPrimary
                           }}
                         >
                           {data.dressCodeDescription?.value || ''}
@@ -451,8 +446,8 @@ export function DetailsSection({
                       <h4
                         className="text-lg font-bold mb-6"
                         style={{
-                          color: template.colors.text,
-                          fontFamily: template.fonts.heading
+                          color: themeStyles.text,
+                          fontFamily: themeStyles.fontSecondary
                         }}
                       >
                         Paleta de Cores
@@ -543,23 +538,22 @@ export function DetailsSection({
             {/* Timeline Tab */}
             {activeTab === 'timeline' && (
               <div
-                className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2"
+                className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl"
                 style={{
-                  borderColor: `${template.colors.primary}20`,
-                  boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                  boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
                 }}
               >
                 <div className="text-center mb-8">
                   <div className="flex items-center justify-center gap-3 mb-4">
                     <Calendar 
                       className="w-8 h-8"
-                      style={{ color: template.colors.primary }}
+                      style={{ color: themeStyles.primary }}
                     />
                     <h3
                       className="text-2xl md:text-3xl font-bold"
                       style={{
-                        color: template.colors.primary,
-                        fontFamily: template.fonts.heading
+                        color: themeStyles.primary,
+                        fontFamily: themeStyles.fontSecondary
                       }}
                     >
                       Cronograma do Evento
@@ -568,8 +562,8 @@ export function DetailsSection({
                   <p
                     className="text-lg"
                     style={{
-                      color: template.colors.textSecondary,
-                      fontFamily: template.fonts.body
+                      color: themeStyles.textSecondary,
+                      fontFamily: themeStyles.fontPrimary
                     }}
                   >
                     Programação completa do nosso grande dia
@@ -607,7 +601,7 @@ export function DetailsSection({
 
                         <div
                           className={cn(
-                            "bg-gray-50 rounded-2xl p-6 border-2 transition-all duration-300",
+                            "bg-gray-50 rounded-2xl p-6 transition-all duration-300 shadow-md hover:shadow-lg",
                             selectedTimelineEvent === index ? "shadow-lg scale-105" : "hover:shadow-md"
                           )}
                           style={{
@@ -625,8 +619,8 @@ export function DetailsSection({
                               <h4
                                 className="text-lg font-bold"
                                 style={{
-                                  color: template.colors.text,
-                                  fontFamily: template.fonts.heading
+                                  color: themeStyles.text,
+                                  fontFamily: themeStyles.fontSecondary
                                 }}
                               >
                                 {event.event}
@@ -634,8 +628,8 @@ export function DetailsSection({
                               <p
                                 className="text-sm opacity-80"
                                 style={{
-                                  color: template.colors.textSecondary,
-                                  fontFamily: template.fonts.body
+                                  color: themeStyles.textSecondary,
+                                  fontFamily: themeStyles.fontPrimary
                                 }}
                               >
                                 {event.description}
@@ -656,10 +650,9 @@ export function DetailsSection({
                 {importantNotes.map((note, index) => (
                   <motion.div
                     key={index}
-                    className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 shadow-lg"
+                    className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
                     style={{
-                      borderColor: `${template.colors.primary}20`,
-                      boxShadow: `0 15px 35px -10px ${template.colors.primary}15`
+                      boxShadow: `0 15px 35px -10px ${themeStyles.primary}15`
                     }}
                     variants={itemVariants}
                     whileHover={{ scale: 1.02, y: -2 }}
@@ -667,7 +660,7 @@ export function DetailsSection({
                     <div className="flex items-start gap-4">
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                        style={{ backgroundColor: template.colors.primary }}
+                        style={{ backgroundColor: themeStyles.primary }}
                       >
                         {note.icon}
                       </div>
@@ -675,8 +668,8 @@ export function DetailsSection({
                         <h4
                           className="text-lg font-bold mb-2"
                           style={{
-                            color: template.colors.text,
-                            fontFamily: template.fonts.heading
+                            color: themeStyles.text,
+                            fontFamily: themeStyles.fontSecondary
                           }}
                         >
                           {note.title}
@@ -684,8 +677,8 @@ export function DetailsSection({
                         <p
                           className="text-sm leading-relaxed"
                           style={{
-                            color: template.colors.textSecondary,
-                            fontFamily: template.fonts.body
+                            color: themeStyles.textSecondary,
+                            fontFamily: themeStyles.fontPrimary
                           }}
                         >
                           {note.description}
@@ -703,10 +696,9 @@ export function DetailsSection({
                 {emergencyContacts.map((contact, index) => (
                   <motion.div
                     key={index}
-                    className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 shadow-lg"
+                    className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
                     style={{
-                      borderColor: `${template.colors.primary}20`,
-                      boxShadow: `0 15px 35px -10px ${template.colors.primary}15`
+                      boxShadow: `0 15px 35px -10px ${themeStyles.primary}15`
                     }}
                     variants={itemVariants}
                     whileHover={{ scale: 1.05, y: -5 }}
@@ -714,7 +706,7 @@ export function DetailsSection({
                     <div className="text-center">
                       <div
                         className="w-16 h-16 rounded-full flex items-center justify-center text-white mx-auto mb-4"
-                        style={{ backgroundColor: template.colors.primary }}
+                        style={{ backgroundColor: themeStyles.primary }}
                       >
                         <UserCheck className="w-8 h-8" />
                       </div>
@@ -722,8 +714,8 @@ export function DetailsSection({
                       <h4
                         className="text-lg font-bold mb-1"
                         style={{
-                          color: template.colors.text,
-                          fontFamily: template.fonts.heading
+                          color: themeStyles.text,
+                          fontFamily: themeStyles.fontSecondary
                         }}
                       >
                         {contact.name}
@@ -732,8 +724,8 @@ export function DetailsSection({
                       <p
                         className="text-sm font-medium mb-4"
                         style={{
-                          color: template.colors.primary,
-                          fontFamily: template.fonts.body
+                          color: themeStyles.primary,
+                          fontFamily: themeStyles.fontPrimary
                         }}
                       >
                         {contact.role}
@@ -741,12 +733,12 @@ export function DetailsSection({
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-center gap-2">
-                          <Phone className="w-4 h-4" style={{ color: template.colors.secondary }} />
+                          <Phone className="w-4 h-4" style={{ color: themeStyles.secondary }} />
                           <span
                             className="text-sm"
                             style={{
-                              color: template.colors.textSecondary,
-                              fontFamily: template.fonts.body
+                              color: themeStyles.textSecondary,
+                              fontFamily: themeStyles.fontPrimary
                             }}
                           >
                             {contact.phone}
@@ -754,12 +746,12 @@ export function DetailsSection({
                         </div>
                         
                         <div className="flex items-center justify-center gap-2">
-                          <Mail className="w-4 h-4" style={{ color: template.colors.secondary }} />
+                          <Mail className="w-4 h-4" style={{ color: themeStyles.secondary }} />
                           <span
                             className="text-sm"
                             style={{
-                              color: template.colors.textSecondary,
-                              fontFamily: template.fonts.body
+                              color: themeStyles.textSecondary,
+                              fontFamily: themeStyles.fontPrimary
                             }}
                           >
                             {contact.email}
@@ -770,8 +762,8 @@ export function DetailsSection({
                       <p
                         className="text-xs text-center leading-relaxed"
                         style={{
-                          color: template.colors.textSecondary,
-                          fontFamily: template.fonts.body
+                          color: themeStyles.textSecondary,
+                          fontFamily: themeStyles.fontPrimary
                         }}
                       >
                         {contact.responsibility}

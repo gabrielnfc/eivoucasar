@@ -37,6 +37,7 @@ import {
 import { EditableField, TemplateSection, WeddingTemplate } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface FooterSectionProps {
   section: TemplateSection;
@@ -75,6 +76,7 @@ export function FooterSection({
   const data = section.data as FooterSectionData;
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [currentYear] = useState(new Date().getFullYear());
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -104,67 +106,90 @@ export function FooterSection({
     }
   };
 
-  // Mock data fallbacks
-  const mockData = {
+  // Extrair dados reais dos noivos da seção Hero
+  const heroSection = template.sections.find(section => section.type === 'hero');
+  const heroData = heroSection?.data as any;
+
+  // Função para extrair nomes dos noivos
+  const getCoupleNames = () => {
+    const brideName = heroData?.brideName?.value || '';
+    const groomName = heroData?.groomName?.value || '';
+    
+    if (brideName && groomName) {
+      return `${brideName} & ${groomName}`;
+    }
+    
+    // Fallback para coupleNames se existir
+    if (heroData?.coupleNames?.value) {
+      return heroData.coupleNames.value;
+    }
+    
+    return 'Noivos';
+  };
+
+  const coupleNames = getCoupleNames();
+
+  // Dados reais do footer com fallbacks sensatos
+  const footerData = {
     thankYouMessage: { 
       id: 'thankYouMessage', 
       type: 'textarea' as const, 
-      value: data?.thankYouMessage?.value || 'Obrigado por fazer parte do nosso dia especial! Vocês tornaram nosso sonho ainda mais bonito e inesquecível. Que nossa jornada juntos seja repleta de amor, alegria e momentos únicos como este.' 
+      value: data?.thankYouMessage?.value || `Obrigado por fazer parte do nosso dia especial! Vocês tornaram nosso sonho ainda mais bonito e inesquecível. Que nossa jornada juntos seja repleta de amor, alegria e momentos únicos como este.` 
     } as EditableField,
     coupleSignature: { 
       id: 'coupleSignature', 
       type: 'text' as const, 
-      value: data?.coupleSignature?.value || 'Com amor, Ana & João' 
+      value: data?.coupleSignature?.value || `Com amor, ${coupleNames}` 
     } as EditableField,
     weddingDate: { 
       id: 'weddingDate', 
       type: 'date', 
-      value: data?.weddingDate?.value || '2024-06-15' 
+      value: data?.weddingDate?.value || heroData?.weddingDate?.value || '2024-06-15' 
     },
     weddingLocation: { 
       id: 'weddingLocation', 
       type: 'text', 
-      value: data?.weddingLocation?.value || 'São Paulo, SP' 
+      value: data?.weddingLocation?.value || heroData?.location?.value || 'Local da Cerimônia' 
     },
     socialLinks: {
       instagram: { 
         id: 'instagram', 
         type: 'url', 
-        value: data?.socialLinks?.instagram?.value || '@anajoao2024' 
+        value: data?.socialLinks?.instagram?.value || '' 
       },
       facebook: { 
         id: 'facebook', 
         type: 'url', 
-        value: data?.socialLinks?.facebook?.value || '/anajoao.casamento' 
+        value: data?.socialLinks?.facebook?.value || '' 
       },
       youtube: { 
         id: 'youtube', 
         type: 'url', 
-        value: data?.socialLinks?.youtube?.value || '@casamentoanajoao' 
+        value: data?.socialLinks?.youtube?.value || '' 
       }
     },
     contactInfo: {
       phone: { 
         id: 'phone', 
         type: 'phone', 
-        value: data?.contactInfo?.phone?.value || '(11) 99999-9999' 
+        value: data?.contactInfo?.phone?.value || '' 
       },
       email: { 
         id: 'email', 
         type: 'email', 
-        value: data?.contactInfo?.email?.value || 'contato@anajoao.com' 
+        value: data?.contactInfo?.email?.value || '' 
       }
     },
     credits: {
       photographer: { 
         id: 'photographer', 
         type: 'text', 
-        value: data?.credits?.photographer?.value || 'Fotografia: Studio Momentos' 
+        value: data?.credits?.photographer?.value || 'Fotografia: Studio' 
       },
       venue: { 
         id: 'venue', 
         type: 'text', 
-        value: data?.credits?.venue?.value || 'Local: Villa Bella Eventos' 
+        value: data?.credits?.venue?.value || 'Local: Eventos' 
       },
       website: { 
         id: 'website', 
@@ -222,7 +247,7 @@ export function FooterSection({
   }, []);
 
   const openSocialLink = (platform: any) => {
-    const username = mockData.socialLinks[platform.key as keyof typeof mockData.socialLinks]?.value;
+    const username = footerData.socialLinks[platform.key as keyof typeof footerData.socialLinks]?.value;
     if (username) {
       const cleanUsername = username.replace('@', '').replace('/', '');
       window.open(`${platform.baseUrl}${cleanUsername}`, '_blank');
@@ -237,8 +262,8 @@ export function FooterSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -247,7 +272,7 @@ export function FooterSection({
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(135deg, ${template.colors.primary}15, ${template.colors.secondary}15, ${template.colors.accent}15)`
+            background: `linear-gradient(135deg, ${themeStyles.primary}15, ${themeStyles.secondary}15, ${themeStyles.accent}15)`
           }}
         />
 
@@ -260,7 +285,7 @@ export function FooterSection({
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                color: template.colors.primary,
+                color: themeStyles.primary,
               }}
               animate={{
                 y: [0, -30, 0],
@@ -288,10 +313,9 @@ export function FooterSection({
             variants={itemVariants}
           >
             <div
-              className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl border-2 max-w-4xl mx-auto"
+              className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto"
               style={{
-                borderColor: `${template.colors.primary}20`,
-                boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
               }}
             >
               {/* Decorative Hearts */}
@@ -301,7 +325,7 @@ export function FooterSection({
                     key={i}
                     variants={heartVariants as any}
                     custom={i}
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   >
                     <Heart className="w-6 h-6 fill-current" />
                   </motion.div>
@@ -311,13 +335,13 @@ export function FooterSection({
               {/* Thank You Message */}
               {isEditable ? (
                 <InlineEditor
-                  field={mockData.thankYouMessage as EditableField}
-                  value={mockData.thankYouMessage.value}
+                  field={footerData.thankYouMessage as EditableField}
+                  value={footerData.thankYouMessage.value}
                   onSave={(value) => onFieldUpdate('thankYouMessage', String(value))}
                   className="text-lg md:text-xl leading-relaxed mb-8"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                   template={template}
                 />
@@ -325,27 +349,24 @@ export function FooterSection({
                 <p
                   className="text-lg md:text-xl leading-relaxed mb-8"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                 >
-                  {mockData.thankYouMessage.value}
+                  {footerData.thankYouMessage.value}
                 </p>
               )}
 
               {/* Couple Signature */}
               {isEditable ? (
                 <InlineEditor
-                  field={mockData.coupleSignature as EditableField}
-                  value={mockData.coupleSignature.value}
+                  field={footerData.coupleSignature as EditableField}
+                  value={footerData.coupleSignature.value}
                   onSave={(value) => onFieldUpdate('coupleSignature', String(value))}
                   className="text-2xl md:text-3xl font-bold"
                   style={{
-                    fontFamily: template.fonts.script || template.fonts.heading,
-                    background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
+                    fontFamily: themeStyles.fontSecondary,
+                    color: themeStyles.primary,
                   }}
                   template={template}
                 />
@@ -353,14 +374,11 @@ export function FooterSection({
                 <h3
                   className="text-2xl md:text-3xl font-bold"
                   style={{
-                    fontFamily: template.fonts.script || template.fonts.heading,
-                    background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
+                    fontFamily: themeStyles.fontSecondary,
+                    color: themeStyles.primary,
                   }}
                 >
-                  {mockData.coupleSignature?.value || ''}
+                  {footerData.coupleSignature?.value || ''}
                 </h3>
               )}
             </div>
@@ -373,18 +391,17 @@ export function FooterSection({
           >
             {/* Wedding Information */}
             <motion.div
-              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2"
+              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl"
               style={{
-                borderColor: `${template.colors.primary}20`,
-                boxShadow: `0 20px 40px -10px ${template.colors.primary}15`
+                boxShadow: `0 20px 40px -10px ${themeStyles.primary}15`
               }}
               variants={itemVariants}
             >
               <h4
                 className="text-xl font-bold mb-6 flex items-center gap-3"
                 style={{
-                  color: template.colors.primary,
-                  fontFamily: template.fonts.heading
+                  color: themeStyles.primary,
+                  fontFamily: themeStyles.fontSecondary
                 }}
               >
                 <Crown className="w-6 h-6" />
@@ -393,17 +410,17 @@ export function FooterSection({
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5" style={{ color: template.colors.secondary }} />
+                  <Calendar className="w-5 h-5" style={{ color: themeStyles.secondary }} />
                   <div>
                     <p className="font-medium">Data do Casamento</p>
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
-                      {new Date(mockData.weddingDate.value).toLocaleDateString('pt-BR', {
+                      {new Date(footerData.weddingDate.value).toLocaleDateString('pt-BR', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -414,49 +431,49 @@ export function FooterSection({
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5" style={{ color: template.colors.secondary }} />
+                  <MapPin className="w-5 h-5" style={{ color: themeStyles.secondary }} />
                   <div>
                     <p className="font-medium">Local</p>
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
-                      {mockData.weddingLocation.value}
+                      {footerData.weddingLocation.value}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5" style={{ color: template.colors.secondary }} />
+                  <Phone className="w-5 h-5" style={{ color: themeStyles.secondary }} />
                   <div>
                     <p className="font-medium">Contato</p>
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
-                      {mockData.contactInfo.phone.value}
+                      {footerData.contactInfo.phone.value}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5" style={{ color: template.colors.secondary }} />
+                  <Mail className="w-5 h-5" style={{ color: themeStyles.secondary }} />
                   <div>
                     <p className="font-medium">E-mail</p>
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
-                      {mockData.contactInfo.email.value}
+                      {footerData.contactInfo.email.value}
                     </p>
                   </div>
                 </div>
@@ -465,18 +482,17 @@ export function FooterSection({
 
             {/* Wedding Stats */}
             <motion.div
-              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2"
+              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl"
               style={{
-                borderColor: `${template.colors.primary}20`,
-                boxShadow: `0 20px 40px -10px ${template.colors.primary}15`
+                boxShadow: `0 20px 40px -10px ${themeStyles.primary}15`
               }}
               variants={itemVariants}
             >
               <h4
                 className="text-xl font-bold mb-6 flex items-center gap-3"
                 style={{
-                  color: template.colors.primary,
-                  fontFamily: template.fonts.heading
+                  color: themeStyles.primary,
+                  fontFamily: themeStyles.fontSecondary
                 }}
               >
                 <Award className="w-6 h-6" />
@@ -488,30 +504,30 @@ export function FooterSection({
                   <motion.div
                     key={index}
                     className="text-center p-4 rounded-xl"
-                    style={{ backgroundColor: `${template.colors.primary}10` }}
+                    style={{ backgroundColor: `${themeStyles.primary}10` }}
                     whileHover={{ scale: 1.05 }}
                     variants={itemVariants}
                   >
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ backgroundColor: template.colors.primary, color: 'white' }}
+                      style={{ backgroundColor: themeStyles.primary, color: 'white' }}
                     >
                       {stat.icon}
                     </div>
-                    <div
-                      className="text-2xl font-bold mb-1"
+                    <p
+                      className="text-2xl font-bold"
                       style={{
-                        color: template.colors.primary,
-                        fontFamily: template.fonts.heading
+                        color: themeStyles.primary,
+                        fontFamily: themeStyles.fontSecondary
                       }}
                     >
                       {stat.value}
-                    </div>
+                    </p>
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
                       {stat.label}
@@ -530,8 +546,8 @@ export function FooterSection({
             <h4
               className="text-2xl font-bold mb-8"
               style={{
-                color: template.colors.primary,
-                fontFamily: template.fonts.heading
+                color: themeStyles.primary,
+                fontFamily: themeStyles.fontSecondary
               }}
             >
               Siga Nossa Jornada
@@ -539,7 +555,7 @@ export function FooterSection({
 
             <div className="flex justify-center gap-4">
               {socialPlatforms.map((platform) => {
-                const username = mockData.socialLinks[platform.key as keyof typeof mockData.socialLinks]?.value;
+                const username = footerData.socialLinks[platform.key as keyof typeof footerData.socialLinks]?.value;
                 if (!username) return null;
 
                 return (
@@ -561,8 +577,8 @@ export function FooterSection({
             <p
               className="text-sm mt-4 opacity-80"
               style={{
-                color: template.colors.textSecondary,
-                fontFamily: template.fonts.body
+                color: themeStyles.textSecondary,
+                fontFamily: themeStyles.fontPrimary
               }}
             >
               Compartilhe nossos momentos especiais
@@ -571,18 +587,17 @@ export function FooterSection({
 
           {/* Credits */}
           <motion.div
-            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2 mb-8"
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl mb-8"
             style={{
-              borderColor: `${template.colors.primary}20`,
-              boxShadow: `0 20px 40px -10px ${template.colors.primary}15`
+              boxShadow: `0 20px 40px -10px ${themeStyles.primary}15`
             }}
             variants={itemVariants}
           >
             <h4
               className="text-lg font-bold mb-6 text-center flex items-center justify-center gap-3"
               style={{
-                color: template.colors.primary,
-                fontFamily: template.fonts.heading
+                color: themeStyles.primary,
+                fontFamily: themeStyles.fontSecondary
               }}
             >
               <Sparkles className="w-5 h-5" />
@@ -591,92 +606,48 @@ export function FooterSection({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div>
-                <Camera className="w-8 h-8 mx-auto mb-2" style={{ color: template.colors.secondary }} />
+                <Camera className="w-8 h-8 mx-auto mb-2" style={{ color: themeStyles.secondary }} />
                 <p
                   className="text-sm font-medium"
                   style={{
-                    color: template.colors.text,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.text,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
-                  {mockData.credits.photographer.value}
+                  {footerData.credits.photographer.value}
                 </p>
               </div>
 
               <div>
-                <Home className="w-8 h-8 mx-auto mb-2" style={{ color: template.colors.secondary }} />
+                <Home className="w-8 h-8 mx-auto mb-2" style={{ color: themeStyles.secondary }} />
                 <p
                   className="text-sm font-medium"
                   style={{
-                    color: template.colors.text,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.text,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
-                  {mockData.credits.venue.value}
+                  {footerData.credits.venue.value}
                 </p>
               </div>
 
               <div>
-                <Globe className="w-8 h-8 mx-auto mb-2" style={{ color: template.colors.secondary }} />
+                <Globe className="w-8 h-8 mx-auto mb-2" style={{ color: themeStyles.secondary }} />
                 <p
                   className="text-sm font-medium"
                   style={{
-                    color: template.colors.text,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.text,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
-                  {mockData.credits.website.value}
+                  {footerData.credits.website.value}
                 </p>
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Bottom Bar */}
-        <div
-          className="border-t py-6"
-          style={{ borderColor: `${template.colors.primary}30` }}
-        >
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4" style={{ color: template.colors.primary }} />
-                <p
-                  className="text-sm"
-                  style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
-                  }}
-                >
-                  © {currentYear} Ana & João. Feito com amor.
-                </p>
-              </div>
 
-              <div className="flex items-center gap-6 text-sm">
-                <span
-                  style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
-                  }}
-                >
-                  Desenvolvido por EiVouCasar
-                </span>
-                <div className="flex items-center gap-2">
-                  <Monitor className="w-4 h-4" />
-                  <Smartphone className="w-4 h-4" />
-                  <span
-                    style={{
-                      color: template.colors.textSecondary,
-                      fontFamily: template.fonts.body
-                    }}
-                  >
-                    100% Responsivo
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Scroll to Top Button */}
@@ -685,7 +656,7 @@ export function FooterSection({
           <motion.button
             onClick={scrollToTop}
             className="fixed bottom-8 right-8 w-12 h-12 rounded-full text-white shadow-lg z-50"
-            style={{ backgroundColor: template.colors.primary }}
+            style={{ backgroundColor: themeStyles.primary }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
@@ -696,6 +667,63 @@ export function FooterSection({
           </motion.button>
         )}
       </AnimatePresence>
+
+      {/* Bottom Copyright */}
+      <div
+        className="border-t py-6"
+        style={{
+          borderColor: `${themeStyles.primary}20`,
+          backgroundColor: `${themeStyles.primary}05`
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+            <p
+              style={{
+                color: themeStyles.textSecondary,
+                fontFamily: themeStyles.fontPrimary
+              }}
+            >
+              © {currentYear} - Feito com 💕 para {coupleNames}
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4" style={{ color: themeStyles.secondary }} />
+                <span
+                  style={{
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
+                  }}
+                >
+                  Mobile Ready
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Monitor className="w-4 h-4" style={{ color: themeStyles.secondary }} />
+                <span
+                  style={{
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
+                  }}
+                >
+                  Responsive Design
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4" style={{ color: themeStyles.primary }} />
+                <span
+                  style={{
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
+                  }}
+                >
+                  EiVouCasar
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </motion.footer>
   );
 } 

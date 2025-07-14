@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/auth-context';
+import { useRequireAuth } from '@/contexts/auth-context'; // Usar o novo hook
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,17 +10,19 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, initialized } = useRequireAuth(); // Usar hook que verifica sob demanda
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Só redirecionar se estiver inicializado e não há usuário
+    if (initialized && !loading && !user) {
+      console.log('AuthGuard: Redirecionando para login - sem usuário');
       router.push('/login');
     }
-  }, [user, loading, router]);
+  }, [user, loading, initialized, router]);
 
   // Show loading while checking auth
-  if (loading) {
+  if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

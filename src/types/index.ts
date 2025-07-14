@@ -81,3 +81,6 @@ export interface GuestRSVP {
   created_at: string
   updated_at: string
 }
+
+// Re-export theme types
+export * from './theme'

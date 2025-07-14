@@ -26,6 +26,7 @@ import {
 import { TemplateSection, WeddingTemplate, VenueSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface VenueSectionProps {
   section: TemplateSection;
@@ -60,6 +61,7 @@ export function VenueSection({
   const data = section.data as VenueSectionData;
   const [activeVenue, setActiveVenue] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -152,8 +154,8 @@ export function VenueSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -162,8 +164,8 @@ export function VenueSection({
         <div
           className="absolute inset-0 opacity-10"
           style={{
-            background: `radial-gradient(circle at 25% 75%, ${template.colors.primary}, transparent 60%),
-                        radial-gradient(circle at 75% 25%, ${template.colors.secondary}, transparent 60%)`
+            background: `radial-gradient(circle at 25% 75%, ${themeStyles.primary}, transparent 60%),
+                        radial-gradient(circle at 75% 25%, ${themeStyles.secondary}, transparent 60%)`
           }}
         />
 
@@ -176,7 +178,7 @@ export function VenueSection({
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                color: template.colors.primary,
+                color: themeStyles.primary,
               }}
               animate={{
                 y: [0, -20, 0],
@@ -208,11 +210,8 @@ export function VenueSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -220,11 +219,8 @@ export function VenueSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -234,7 +230,7 @@ export function VenueSection({
           <motion.div
             className="w-32 h-1 mx-auto rounded-full mb-8"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             variants={itemVariants}
           />
@@ -242,8 +238,8 @@ export function VenueSection({
           <p
             className="text-lg md:text-xl max-w-3xl mx-auto"
             style={{
-              fontFamily: template.fonts.body,
-              color: template.colors.textSecondary,
+              fontFamily: themeStyles.fontPrimary,
+              color: themeStyles.textSecondary,
             }}
           >
             Encontre-nos nos locais especiais onde celebraremos nossa união! 💕
@@ -263,10 +259,9 @@ export function VenueSection({
               transition={{ delay: index * 0.2 }}
             >
               <div
-                className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-2 overflow-hidden transition-all duration-300 hover:shadow-3xl hover:scale-105"
+                className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl hover:scale-105"
                 style={{
-                  borderColor: `${template.colors.primary}20`,
-                  boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                  boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
                 }}
               >
                 {/* Venue Image */}
@@ -282,7 +277,7 @@ export function VenueSection({
                   <div
                     className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-medium flex items-center gap-2"
                     style={{
-                      background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                      background: themeStyles.primaryGradient
                     }}
                   >
                     {venue.icon}
@@ -293,7 +288,7 @@ export function VenueSection({
                   <motion.button
                     onClick={() => shareLocation(venue)}
                     className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-white"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -307,8 +302,8 @@ export function VenueSection({
                     <h3
                       className="text-xl font-bold mb-2"
                       style={{
-                        fontFamily: template.fonts.heading,
-                        color: template.colors.primary,
+                        fontFamily: themeStyles.fontSecondary,
+                        color: themeStyles.primary,
                       }}
                     >
                       {venue.title}
@@ -316,8 +311,8 @@ export function VenueSection({
                     <p
                       className="text-sm opacity-80"
                       style={{
-                        fontFamily: template.fonts.body,
-                        color: template.colors.textSecondary,
+                        fontFamily: themeStyles.fontPrimary,
+                        color: themeStyles.textSecondary,
                       }}
                     >
                       {venue.description}
@@ -329,14 +324,14 @@ export function VenueSection({
                     <div className="flex items-start gap-3">
                       <MapPin 
                         className="w-5 h-5 mt-0.5 flex-shrink-0"
-                        style={{ color: template.colors.primary }}
+                        style={{ color: themeStyles.primary }}
                       />
                       <div>
                         <p
                           className="font-medium"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.text,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.text,
                           }}
                         >
                           {venue.address}
@@ -347,13 +342,13 @@ export function VenueSection({
                     <div className="flex items-center gap-3">
                       <Clock 
                         className="w-5 h-5 flex-shrink-0"
-                        style={{ color: template.colors.primary }}
+                        style={{ color: themeStyles.primary }}
                       />
                       <p
                         className="font-medium"
                         style={{
-                          fontFamily: template.fonts.body,
-                          color: template.colors.text,
+                          fontFamily: themeStyles.fontPrimary,
+                          color: themeStyles.text,
                         }}
                       >
                         {venue.time}
@@ -364,13 +359,13 @@ export function VenueSection({
                       <div className="flex items-center gap-3">
                         <Phone 
                           className="w-5 h-5 flex-shrink-0"
-                          style={{ color: template.colors.primary }}
+                          style={{ color: themeStyles.primary }}
                         />
                         <p
                           className="font-medium"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.text,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.text,
                           }}
                         >
                           {venue.phone}
@@ -385,13 +380,13 @@ export function VenueSection({
                       <div className="flex items-start gap-3">
                         <ParkingCircle 
                           className="w-5 h-5 mt-0.5 flex-shrink-0"
-                          style={{ color: template.colors.secondary }}
+                          style={{ color: themeStyles.secondary }}
                         />
                         <p
                           className="text-sm"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.textSecondary,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.textSecondary,
                           }}
                         >
                           {venue.parkingInfo}
@@ -403,13 +398,13 @@ export function VenueSection({
                       <div className="flex items-start gap-3">
                         <Bus 
                           className="w-5 h-5 mt-0.5 flex-shrink-0"
-                          style={{ color: template.colors.secondary }}
+                          style={{ color: themeStyles.secondary }}
                         />
                         <p
                           className="text-sm"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.textSecondary,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.textSecondary,
                           }}
                         >
                           {venue.publicTransport}
@@ -424,8 +419,9 @@ export function VenueSection({
                       onClick={() => openDirections(venue.address)}
                       className="flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
                       style={{
-                        background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                        color: 'white'
+                        background: themeStyles.primaryGradient,
+                        color: 'white',
+                        boxShadow: `0 4px 12px -2px ${themeStyles.primary}30`
                       }}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
@@ -439,8 +435,9 @@ export function VenueSection({
                         onClick={() => window.open(venue.website, '_blank')}
                         className="py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 border-2"
                         style={{
-                          borderColor: template.colors.primary,
-                          color: template.colors.primary
+                          borderColor: themeStyles.primary,
+                          color: themeStyles.primary,
+                          boxShadow: `0 4px 12px -2px ${themeStyles.primary}30`
                         }}
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
@@ -461,10 +458,9 @@ export function VenueSection({
           variants={itemVariants}
         >
           <div
-            className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-2 overflow-hidden"
+            className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden"
             style={{
-              borderColor: `${template.colors.primary}20`,
-              boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+              boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
             }}
           >
             <div className="p-6 border-b border-gray-200">
@@ -472,8 +468,8 @@ export function VenueSection({
                 <h3
                   className="text-2xl font-bold flex items-center gap-3"
                   style={{
-                    color: template.colors.primary,
-                    fontFamily: template.fonts.heading
+                    color: themeStyles.primary,
+                    fontFamily: themeStyles.fontSecondary
                   }}
                 >
                   <MapPin className="w-6 h-6" />
@@ -481,10 +477,11 @@ export function VenueSection({
                 </h3>
                 <motion.button
                   onClick={() => setShowMap(!showMap)}
-                  className="px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 border-2"
+                  className="px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-2"
                   style={{
-                    borderColor: template.colors.primary,
-                    color: template.colors.primary
+                    backgroundColor: themeStyles.primary,
+                    color: 'white',
+                    boxShadow: `0 4px 12px -2px ${themeStyles.primary}30`
                   }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -508,13 +505,13 @@ export function VenueSection({
                     <div className="text-center">
                       <MapPin 
                         className="w-16 h-16 mx-auto mb-4"
-                        style={{ color: template.colors.primary }}
+                        style={{ color: themeStyles.primary }}
                       />
                       <p
                         className="text-lg font-medium"
                         style={{
-                          color: template.colors.primary,
-                          fontFamily: template.fonts.heading
+                          color: themeStyles.primary,
+                          fontFamily: themeStyles.fontSecondary
                         }}
                       >
                         Mapa Interativo
@@ -522,8 +519,8 @@ export function VenueSection({
                       <p
                         className="text-sm opacity-70"
                         style={{
-                          color: template.colors.textSecondary,
-                          fontFamily: template.fonts.body
+                          color: themeStyles.textSecondary,
+                          fontFamily: themeStyles.fontPrimary
                         }}
                       >
                         Aqui seria exibido o mapa com os locais marcados
@@ -543,18 +540,17 @@ export function VenueSection({
         >
           {/* Parking Information */}
           <motion.div
-            className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2"
+            className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             style={{
-              borderColor: `${template.colors.accent}30`,
-              boxShadow: `0 10px 30px -10px ${template.colors.accent}20`
+              boxShadow: `0 15px 35px -10px ${themeStyles.primary}15`
             }}
             variants={itemVariants}
           >
             <h4
               className="text-lg font-bold mb-4 flex items-center gap-2"
               style={{
-                color: template.colors.primary,
-                fontFamily: template.fonts.heading
+                color: themeStyles.primary,
+                fontFamily: themeStyles.fontSecondary
               }}
             >
               <Car className="w-5 h-5" />
@@ -564,13 +560,13 @@ export function VenueSection({
               <div className="flex items-start gap-3">
                 <div
                   className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: template.colors.primary }}
+                  style={{ backgroundColor: themeStyles.primary }}
                 />
                 <p
                   className="text-sm"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                 >
                   Estacionamento gratuito disponível na cerimônia
@@ -579,13 +575,13 @@ export function VenueSection({
               <div className="flex items-start gap-3">
                 <div
                   className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: template.colors.primary }}
+                  style={{ backgroundColor: themeStyles.primary }}
                 />
                 <p
                   className="text-sm"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                 >
                   Serviço de valet disponível na recepção
@@ -596,18 +592,17 @@ export function VenueSection({
 
           {/* Transportation Tips */}
           <motion.div
-            className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2"
+            className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             style={{
-              borderColor: `${template.colors.accent}30`,
-              boxShadow: `0 10px 30px -10px ${template.colors.accent}20`
+              boxShadow: `0 15px 35px -10px ${themeStyles.primary}15`
             }}
             variants={itemVariants}
           >
             <h4
               className="text-lg font-bold mb-4 flex items-center gap-2"
               style={{
-                color: template.colors.primary,
-                fontFamily: template.fonts.heading
+                color: themeStyles.primary,
+                fontFamily: themeStyles.fontSecondary
               }}
             >
               <Route className="w-5 h-5" />
@@ -617,13 +612,13 @@ export function VenueSection({
               <div className="flex items-start gap-3">
                 <div
                   className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: template.colors.primary }}
+                  style={{ backgroundColor: themeStyles.primary }}
                 />
                 <p
                   className="text-sm"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                 >
                   Metrô e ônibus próximos aos locais
@@ -632,13 +627,13 @@ export function VenueSection({
               <div className="flex items-start gap-3">
                 <div
                   className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: template.colors.primary }}
+                  style={{ backgroundColor: themeStyles.primary }}
                 />
                 <p
                   className="text-sm"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.textSecondary,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.textSecondary,
                   }}
                 >
                   Transporte entre cerimônia e festa organizado

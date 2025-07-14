@@ -25,20 +25,20 @@ interface CoupleData {
   isPublished: boolean
 }
 
-// GET - Buscar dados completos do casal pelo slug
+// GET - Buscar dados completos do casal pelo ID (API PRIVADA - Dashboard)
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ coupleId: string }> }
 ) {
   try {
-    const { slug } = await params
+    const { coupleId } = await params
     
-    console.log('🔍 API [slug] - Iniciando busca para slug:', slug)
+    console.log('🔍 API Private [coupleId] - Iniciando busca para ID:', coupleId)
     
-    if (!slug) {
-      console.log('❌ Slug não fornecido')
+    if (!coupleId) {
+      console.log('❌ coupleId não fornecido')
       return NextResponse.json(
-        { success: false, error: 'Slug é obrigatório' },
+        { success: false, error: 'ID do casal é obrigatório' },
         { status: 400 }
       )
     }
@@ -46,16 +46,7 @@ export async function GET(
     const supabase = await createClient()
     console.log('✅ Cliente Supabase criado')
     
-    // Primeiro, vamos verificar se existem casais na tabela
-    const { data: allCouples, error: countError } = await supabase
-      .from('couples')
-      .select('id, slug')
-      .limit(5)
-    
-    console.log('📊 Total de casais encontrados:', allCouples?.length || 0)
-    console.log('📋 Slugs disponíveis:', allCouples?.map(c => c.slug) || [])
-    
-    // Buscar dados completos do casal
+    // Buscar dados completos do casal por ID (sem filtro de publicação para dashboard)
     const { data: couple, error } = await supabase
       .from('couples')
       .select(`
@@ -81,7 +72,7 @@ export async function GET(
         is_active,
         is_published
       `)
-      .eq('slug', slug)
+      .eq('id', coupleId)
       .single()
 
     if (error) {
@@ -91,9 +82,7 @@ export async function GET(
           success: false, 
           error: 'Casal não encontrado',
           debug: {
-            slugBuscado: slug,
-            slugsDisponiveis: allCouples?.map(c => c.slug) || [],
-            totalCasais: allCouples?.length || 0,
+            coupleIdBuscado: coupleId,
             errorCode: error.code,
             errorMessage: error.message
           }
@@ -103,15 +92,13 @@ export async function GET(
     }
 
     if (!couple) {
-      console.log('❌ Nenhum casal encontrado para slug:', slug)
+      console.log('❌ Nenhum casal encontrado para ID:', coupleId)
       return NextResponse.json(
         { 
           success: false, 
           error: 'Casal não encontrado',
           debug: {
-            slugBuscado: slug,
-            slugsDisponiveis: allCouples?.map(c => c.slug) || [],
-            totalCasais: allCouples?.length || 0
+            coupleIdBuscado: coupleId
           }
         },
         { status: 404 }
@@ -159,18 +146,18 @@ export async function GET(
   }
 }
 
-// PUT - Atualizar dados do casal
+// PUT - Atualizar dados do casal (API PRIVADA - Dashboard)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ coupleId: string }> }
 ) {
   try {
-    const { slug } = await params
+    const { coupleId } = await params
     const body = await request.json()
     
-    if (!slug) {
+    if (!coupleId) {
       return NextResponse.json(
-        { success: false, error: 'Slug é obrigatório' },
+        { success: false, error: 'ID do casal é obrigatório' },
         { status: 400 }
       )
     }
@@ -181,7 +168,7 @@ export async function PUT(
     const { data: existingCouple, error: fetchError } = await supabase
       .from('couples')
       .select('id')
-      .eq('slug', slug)
+      .eq('id', coupleId)
       .single()
 
     if (fetchError || !existingCouple) {
@@ -215,7 +202,7 @@ export async function PUT(
     const { data: updatedCouple, error: updateError } = await supabase
       .from('couples')
       .update(updateData)
-      .eq('slug', slug)
+      .eq('id', coupleId)
       .select()
       .single()
 

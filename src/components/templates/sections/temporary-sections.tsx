@@ -29,6 +29,7 @@ function TemporarySection({ section }: SectionProps) {
 }
 
 // Export das seções implementadas
+export { HeroSection } from './hero-section';
 export { InvitationSection } from './invitation-section';
 export { CountdownSection } from './countdown-section';
 export { StorySection } from './story-section';

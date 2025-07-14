@@ -6,6 +6,7 @@ import { Heart, Plus, Calendar, MapPin, Camera, Edit3, Trash2 } from 'lucide-rea
 import { TemplateSection, WeddingTemplate, StorySectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface StorySectionProps {
   section: TemplateSection;
@@ -22,6 +23,7 @@ export function StorySection({
 }: StorySectionProps) {
   const data = section.data as StorySectionData;
   const [selectedMoment, setSelectedMoment] = useState<number | null>(null);
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,8 +74,8 @@ export function StorySection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Pattern */}
@@ -81,7 +83,7 @@ export function StorySection({
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${template.colors.primary.replace('#', '')}' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${themeStyles.primary.replace('#', '')}' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
       </div>
@@ -125,11 +127,8 @@ export function StorySection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -137,11 +136,8 @@ export function StorySection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -151,7 +147,7 @@ export function StorySection({
           <motion.div
             className="w-24 h-1 mx-auto mb-8 rounded-full"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.secondaryGradient
             }}
             variants={itemVariants}
           />
@@ -164,8 +160,8 @@ export function StorySection({
                 onSave={(value) => onFieldUpdate('story', String(value))}
                 className="text-lg md:text-xl leading-relaxed"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
                 template={template}
               />
@@ -173,8 +169,8 @@ export function StorySection({
               <div
                 className="text-lg md:text-xl leading-relaxed"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
                 dangerouslySetInnerHTML={{ __html: data.story.value }}
               />
@@ -208,11 +204,11 @@ export function StorySection({
               {/* Decorative Frame */}
               <div
                 className="absolute -inset-4 rounded-3xl border-4 opacity-20 -z-10"
-                style={{ borderColor: template.colors.primary }}
+                style={{ borderColor: themeStyles.primary }}
               />
               <div
                 className="absolute -inset-8 rounded-3xl border-2 opacity-10 -z-20"
-                style={{ borderColor: template.colors.secondary }}
+                style={{ borderColor: themeStyles.secondary }}
               />
             </div>
           ) : isEditable && data.coupleImage && (
@@ -222,17 +218,17 @@ export function StorySection({
               whileTap={{ scale: 0.98 }}
             >
               <div 
-                className="aspect-[4/3] border-2 border-dashed rounded-2xl flex items-center justify-center bg-white/50 backdrop-blur-sm cursor-pointer"
-                style={{ borderColor: template.colors.primary + '40' }}
+                className="aspect-[4/3] border-dashed border-2 border-gray-300 rounded-2xl flex items-center justify-center bg-white/50 backdrop-blur-sm cursor-pointer"
+                style={{ borderColor: themeStyles.primary + '40' }}
               >
                 <div className="text-center p-8">
                   <Camera 
                     className="w-12 h-12 mx-auto mb-4 opacity-50"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   />
                   <p 
                     className="text-sm font-medium opacity-70"
-                    style={{ color: template.colors.text }}
+                    style={{ color: themeStyles.text }}
                   >
                     Clique para adicionar foto do casal
                   </p>
@@ -251,8 +247,8 @@ export function StorySection({
             <h3
               className="text-2xl md:text-3xl font-bold mb-4"
               style={{
-                fontFamily: template.fonts.heading,
-                color: template.colors.primary,
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               Nossa Jornada
@@ -260,8 +256,8 @@ export function StorySection({
             <p
               className="text-lg opacity-80"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               Os momentos especiais que nos trouxeram até aqui
@@ -274,7 +270,7 @@ export function StorySection({
             <motion.div
               className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full rounded-full"
               style={{
-                background: `linear-gradient(to bottom, ${template.colors.primary}, ${template.colors.secondary})`
+                background: themeStyles.secondaryGradient
               }}
               variants={timelineVariants}
             />
@@ -294,19 +290,19 @@ export function StorySection({
                 >
                   {/* Content Card */}
                   <div className={cn(
-                    "w-5/12 p-6 rounded-2xl shadow-lg border-2 cursor-pointer transition-all duration-300",
+                    "w-5/12 p-6 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl",
                     selectedMoment === index ? "scale-105" : "hover:shadow-xl"
                   )}
                   style={{
                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    borderColor: selectedMoment === index ? template.colors.primary : `${template.colors.accent}40`,
+                    borderColor: selectedMoment === index ? themeStyles.primary : `${themeStyles.accent}40`,
                     backdropFilter: 'blur(10px)'
                   }}>
                     {/* Date */}
                     <div className="flex items-center gap-2 mb-3">
                       <Calendar 
                         className="w-4 h-4"
-                        style={{ color: template.colors.primary }}
+                        style={{ color: themeStyles.primary }}
                       />
                       {isEditable ? (
                         <InlineEditor
@@ -315,8 +311,8 @@ export function StorySection({
                           onSave={(value) => onFieldUpdate(`timeline.${index}.date`, String(value))}
                           className="text-sm font-medium"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.primary,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.primary,
                           }}
                           template={template}
                         />
@@ -324,8 +320,8 @@ export function StorySection({
                         <span
                           className="text-sm font-medium"
                           style={{
-                            fontFamily: template.fonts.body,
-                            color: template.colors.primary,
+                            fontFamily: themeStyles.fontPrimary,
+                            color: themeStyles.primary,
                           }}
                         >
                           {new Date(moment.date.value).toLocaleDateString('pt-BR', {
@@ -345,8 +341,8 @@ export function StorySection({
                         onSave={(value) => onFieldUpdate(`timeline.${index}.title`, String(value))}
                         className="text-xl font-bold mb-3"
                         style={{
-                          fontFamily: template.fonts.heading,
-                          color: template.colors.text,
+                          fontFamily: themeStyles.fontSecondary,
+                          color: themeStyles.text,
                         }}
                         template={template}
                       />
@@ -354,8 +350,8 @@ export function StorySection({
                       <h4
                         className="text-xl font-bold mb-3"
                         style={{
-                          fontFamily: template.fonts.heading,
-                          color: template.colors.text,
+                          fontFamily: themeStyles.fontSecondary,
+                          color: themeStyles.text,
                         }}
                       >
                         {moment.title.value}
@@ -370,8 +366,8 @@ export function StorySection({
                         onSave={(value) => onFieldUpdate(`timeline.${index}.description`, String(value))}
                         className="text-base leading-relaxed"
                         style={{
-                          fontFamily: template.fonts.body,
-                          color: template.colors.textSecondary,
+                          fontFamily: themeStyles.fontPrimary,
+                          color: themeStyles.textSecondary,
                         }}
                         template={template}
                       />
@@ -379,8 +375,8 @@ export function StorySection({
                       <p
                         className="text-base leading-relaxed"
                         style={{
-                          fontFamily: template.fonts.body,
-                          color: template.colors.textSecondary,
+                          fontFamily: themeStyles.fontPrimary,
+                          color: themeStyles.textSecondary,
                         }}
                       >
                         {moment.description.value}
@@ -432,13 +428,13 @@ export function StorySection({
                     <motion.div
                       className="w-12 h-12 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-10"
                       style={{
-                        backgroundColor: template.colors.primary,
+                        backgroundColor: themeStyles.primary,
                       }}
                       whileHover={{ scale: 1.2 }}
                       animate={{
                         boxShadow: selectedMoment === index 
-                          ? `0 0 20px ${template.colors.primary}60`
-                          : `0 0 10px ${template.colors.primary}30`
+                          ? `0 0 20px ${themeStyles.primary}60`
+                          : `0 0 10px ${themeStyles.primary}30`
                       }}
                     >
                       <Heart className="w-5 h-5 text-white" />
@@ -457,8 +453,8 @@ export function StorySection({
                     onClick={addNewMoment}
                     className="flex items-center gap-2 px-6 py-3 rounded-full border-2 border-dashed hover:bg-white/50 transition-all duration-300"
                     style={{
-                      borderColor: template.colors.primary,
-                      color: template.colors.primary
+                      borderColor: themeStyles.primary,
+                      color: themeStyles.primary
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -486,7 +482,7 @@ export function StorySection({
             <div
               className="w-16 h-px opacity-30"
               style={{
-                background: `linear-gradient(to right, transparent, ${template.colors.primary})`
+                background: `linear-gradient(to right, transparent, ${themeStyles.primary})`
               }}
             />
             
@@ -504,7 +500,7 @@ export function StorySection({
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center border-4"
                 style={{
-                  background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
+                  background: themeStyles.primaryGradient,
                   borderColor: 'rgba(255, 255, 255, 0.2)'
                 }}
               >
@@ -515,7 +511,7 @@ export function StorySection({
             <div
               className="w-16 h-px opacity-30"
               style={{
-                background: `linear-gradient(to left, transparent, ${template.colors.primary})`
+                background: `linear-gradient(to left, transparent, ${themeStyles.primary})`
               }}
             />
           </motion.div>

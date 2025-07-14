@@ -36,6 +36,7 @@ import {
 import { TemplateSection, WeddingTemplate, TestimonialsSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface TestimonialsSectionProps {
   section: TemplateSection;
@@ -86,6 +87,7 @@ export function TestimonialsSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [expandedTestimonial, setExpandedTestimonial] = useState<string | null>(null);
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -291,8 +293,8 @@ export function TestimonialsSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -301,8 +303,8 @@ export function TestimonialsSection({
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            background: `radial-gradient(circle at 25% 75%, ${template.colors.primary}, transparent 60%),
-                        radial-gradient(circle at 75% 25%, ${template.colors.secondary}, transparent 60%)`
+            background: `radial-gradient(circle at 25% 75%, ${themeStyles.primary}, transparent 60%),
+                        radial-gradient(circle at 75% 25%, ${themeStyles.secondary}, transparent 60%)`
           }}
         />
 
@@ -315,7 +317,7 @@ export function TestimonialsSection({
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                color: template.colors.primary,
+                color: themeStyles.primary,
               }}
               animate={{
                 y: [0, -20, 0],
@@ -347,11 +349,8 @@ export function TestimonialsSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -359,11 +358,8 @@ export function TestimonialsSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title?.value || ''}
@@ -377,8 +373,8 @@ export function TestimonialsSection({
               onSave={(value) => onFieldUpdate('subtitle', String(value))}
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -386,8 +382,8 @@ export function TestimonialsSection({
             <p
               className="text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {data.subtitle?.value || 'Palavras carinhosas dos nossos queridos amigos e familiares'}
@@ -397,7 +393,7 @@ export function TestimonialsSection({
           <motion.div
             className="w-32 h-1 mx-auto rounded-full mb-8"
             style={{
-              background: `linear-gradient(90deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             variants={itemVariants}
           />
@@ -407,7 +403,7 @@ export function TestimonialsSection({
             onClick={() => setShowForm(!showForm)}
             className="px-8 py-4 rounded-full font-medium transition-all duration-300 flex items-center gap-2 mx-auto text-white shadow-lg"
             style={{
-              background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+              background: themeStyles.primaryGradient
             }}
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.98 }}
@@ -428,18 +424,17 @@ export function TestimonialsSection({
               exit="hidden"
             >
               <div
-                className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 max-w-2xl mx-auto"
+                className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl max-w-2xl mx-auto"
                 style={{
-                  borderColor: `${template.colors.primary}20`,
-                  boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                  boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
                 }}
               >
                 <div className="text-center mb-8">
                   <h3
                     className="text-2xl font-bold mb-2"
                     style={{
-                      color: template.colors.primary,
-                      fontFamily: template.fonts.heading
+                      color: themeStyles.primary,
+                      fontFamily: themeStyles.fontSecondary
                     }}
                   >
                     Deixe seu Depoimento
@@ -447,8 +442,8 @@ export function TestimonialsSection({
                   <p
                     className="text-base"
                     style={{
-                      color: template.colors.textSecondary,
-                      fontFamily: template.fonts.body
+                      color: themeStyles.textSecondary,
+                      fontFamily: themeStyles.fontPrimary
                     }}
                   >
                     Compartilhe suas palavras de carinho conosco
@@ -538,7 +533,7 @@ export function TestimonialsSection({
                       disabled={isSubmitting}
                       className="flex-1 py-3 px-6 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 text-white"
                       style={{
-                        background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
+                        background: themeStyles.primaryGradient,
                         opacity: isSubmitting ? 0.7 : 1
                       }}
                       whileHover={{ scale: 1.02 }}
@@ -566,8 +561,8 @@ export function TestimonialsSection({
                       onClick={() => setShowForm(false)}
                       className="px-6 py-3 rounded-xl font-medium transition-all duration-300 border-2"
                       style={{
-                        borderColor: template.colors.primary,
-                        color: template.colors.primary
+                        borderColor: themeStyles.primary,
+                        color: themeStyles.primary
                       }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -591,7 +586,7 @@ export function TestimonialsSection({
               exit={{ opacity: 0, scale: 0.8 }}
             >
               <div
-                className="inline-block bg-green-50 border-2 border-green-200 rounded-2xl px-6 py-4"
+                className="inline-block bg-green-50 rounded-2xl px-6 py-4"
               >
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-green-600" />
@@ -622,12 +617,12 @@ export function TestimonialsSection({
               )}
               style={{
                 background: selectedFilter === filter.id 
-                  ? `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`
+                  ? themeStyles.primaryGradient
                   : 'rgba(255,255,255,0.7)',
                 backdropFilter: 'blur(10px)',
                 border: selectedFilter === filter.id 
                   ? 'none' 
-                  : `1px solid ${template.colors.primary}30`
+                  : `1px solid ${themeStyles.primary}30`
               }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -646,133 +641,112 @@ export function TestimonialsSection({
             <motion.div
               key={testimonial.id}
               className={cn(
-                "bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border-2 relative overflow-hidden",
-                testimonial.isHighlighted && "ring-2 ring-yellow-400"
+                "bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl relative overflow-hidden",
+                testimonial.isHighlighted && "ring-2 ring-purple-200"
               )}
               style={{
-                borderColor: testimonial.isHighlighted ? '#fbbf24' : `${template.colors.primary}20`,
-                boxShadow: `0 25px 50px -12px ${testimonial.isHighlighted ? '#fbbf24' : template.colors.primary}20`
+                boxShadow: testimonial.isHighlighted 
+                  ? `0 25px 50px -12px ${themeStyles.primary}30` 
+                  : `0 15px 35px -10px ${themeStyles.primary}15`
               }}
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02, y: -5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
             >
-              {/* Highlight Badge */}
               {testimonial.isHighlighted && (
-                <div className="absolute top-4 right-4">
-                  <div className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                    <Crown className="w-3 h-3" />
-                    Destaque
+                <div className="absolute -top-2 -right-2">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: themeStyles.primary }}
+                  >
+                    <Crown className="w-4 h-4 text-white" />
                   </div>
                 </div>
               )}
 
-              {/* Quote Icon */}
-              <div className="absolute top-4 left-4">
-                <Quote 
-                  className="w-8 h-8 opacity-20"
-                  style={{ color: template.colors.primary }}
-                />
-              </div>
-
-              {/* Avatar & Info */}
-              <div className="flex items-center gap-4 mb-4 mt-8">
+              <div className="flex items-start gap-4 mb-4">
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-                  style={{ backgroundColor: `${template.colors.primary}20` }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold"
+                  style={{ backgroundColor: themeStyles.primary, color: 'white' }}
                 >
-                  {testimonial.avatar}
+                  {testimonial.avatar || testimonial.name.charAt(0)}
                 </div>
-                <div>
-                  <h4
-                    className="font-bold text-lg"
-                    style={{
-                      color: template.colors.text,
-                      fontFamily: template.fonts.heading
-                    }}
-                  >
-                    {testimonial.name}
-                  </h4>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4
+                      className="font-bold text-lg"
+                      style={{
+                        color: themeStyles.text,
+                        fontFamily: themeStyles.fontSecondary
+                      }}
+                    >
+                      {testimonial.name}
+                    </h4>
+                    <div className="flex items-center gap-1">
+                      {renderStars(testimonial.rating || 5)}
+                    </div>
+                  </div>
                   <p
                     className="text-sm opacity-80"
                     style={{
-                      color: template.colors.primary,
-                      fontFamily: template.fonts.body
+                      color: themeStyles.textSecondary,
+                      fontFamily: themeStyles.fontPrimary
                     }}
                   >
                     {testimonial.relationship}
                   </p>
-                  {testimonial.location && (
-                    <p
-                      className="text-xs opacity-60"
-                      style={{
-                        color: template.colors.textSecondary,
-                        fontFamily: template.fonts.body
-                      }}
-                    >
-                      {testimonial.location}
-                    </p>
-                  )}
+                  <p
+                    className="text-xs opacity-60"
+                    style={{
+                      color: themeStyles.textSecondary,
+                      fontFamily: themeStyles.fontPrimary
+                    }}
+                  >
+                    {testimonial.location} • {new Date(testimonial.date).toLocaleDateString('pt-BR')}
+                  </p>
                 </div>
               </div>
 
-              {/* Rating */}
-              {testimonial.rating && (
-                <div className="flex items-center gap-1 mb-4">
-                  {renderStars(testimonial.rating)}
-                </div>
-              )}
-
-              {/* Message */}
               <div className="mb-4">
-                <p
-                  className={cn(
-                    "leading-relaxed",
-                    expandedTestimonial === testimonial.id ? "" : "line-clamp-4"
-                  )}
-                  style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
-                  }}
-                >
-                  {testimonial.message}
-                </p>
-                {testimonial.message.length > 150 && (
+                <div className="flex items-start gap-2">
+                  <Quote 
+                    className="w-6 h-6 mt-1 opacity-30" 
+                    style={{ color: themeStyles.primary }}
+                  />
+                  <blockquote
+                    className="text-base leading-relaxed"
+                    style={{
+                      color: themeStyles.text,
+                      fontFamily: themeStyles.fontPrimary
+                    }}
+                  >
+                    {expandedTestimonial === testimonial.id || testimonial.message.length <= 200
+                      ? testimonial.message
+                      : `${testimonial.message.substring(0, 200)}...`}
+                  </blockquote>
+                </div>
+                
+                {testimonial.message.length > 200 && (
                   <button
                     onClick={() => setExpandedTestimonial(
                       expandedTestimonial === testimonial.id ? null : testimonial.id
                     )}
                     className="text-sm font-medium mt-2 hover:underline"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   >
                     {expandedTestimonial === testimonial.id ? 'Ver menos' : 'Ver mais'}
                   </button>
                 )}
               </div>
 
-              {/* Date */}
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-4 h-4 opacity-60" />
-                <span
-                  className="text-xs opacity-60"
-                  style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
-                  }}
-                >
-                  {new Date(testimonial.date).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-4">
                   <motion.button
                     onClick={() => toggleLike(testimonial.id)}
-                    className="flex items-center gap-1 text-sm transition-colors"
+                    className="flex items-center gap-2 text-sm hover:scale-110 transition-transform"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -784,23 +758,43 @@ export function TestimonialsSection({
                     />
                     <span
                       style={{
-                        color: testimonial.isLiked ? '#ef4444' : template.colors.textSecondary,
-                        fontFamily: template.fonts.body
+                        color: testimonial.isLiked ? '#ef4444' : themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
                       }}
                     >
                       {testimonial.likes}
                     </span>
                   </motion.button>
+
+                  <motion.button
+                    onClick={() => shareTestimonial(testimonial)}
+                    className="flex items-center gap-2 text-sm hover:scale-110 transition-transform"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Share2 className="w-4 h-4" style={{ color: themeStyles.secondary }} />
+                    <span
+                      style={{
+                        color: themeStyles.textSecondary,
+                        fontFamily: themeStyles.fontPrimary
+                      }}
+                    >
+                      Compartilhar
+                    </span>
+                  </motion.button>
                 </div>
 
-                <motion.button
-                  onClick={() => shareTestimonial(testimonial)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Share2 className="w-4 h-4" style={{ color: template.colors.secondary }} />
-                </motion.button>
+                <div className="flex items-center gap-1 text-xs">
+                  <Clock className="w-3 h-3" style={{ color: themeStyles.textSecondary }} />
+                  <span
+                    style={{
+                      color: themeStyles.textSecondary,
+                      fontFamily: themeStyles.fontPrimary
+                    }}
+                  >
+                    {new Date(testimonial.date).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -812,10 +806,9 @@ export function TestimonialsSection({
           variants={itemVariants}
         >
           <div
-            className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 max-w-2xl mx-auto"
+            className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl max-w-2xl mx-auto"
             style={{
-              borderColor: `${template.colors.primary}20`,
-              boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+              boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
             }}
           >
             <div className="grid grid-cols-3 gap-8">
@@ -823,8 +816,8 @@ export function TestimonialsSection({
                 <div
                   className="text-3xl font-bold mb-2"
                   style={{
-                    color: template.colors.primary,
-                    fontFamily: template.fonts.heading
+                    color: themeStyles.primary,
+                    fontFamily: themeStyles.fontSecondary
                   }}
                 >
                   {mockTestimonials.length}
@@ -832,8 +825,8 @@ export function TestimonialsSection({
                 <p
                   className="text-sm opacity-80"
                   style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
                   Depoimentos
@@ -844,8 +837,8 @@ export function TestimonialsSection({
                 <div
                   className="text-3xl font-bold mb-2"
                   style={{
-                    color: template.colors.primary,
-                    fontFamily: template.fonts.heading
+                    color: themeStyles.primary,
+                    fontFamily: themeStyles.fontSecondary
                   }}
                 >
                   {mockTestimonials.reduce((sum, t) => sum + t.likes, 0)}
@@ -853,8 +846,8 @@ export function TestimonialsSection({
                 <p
                   className="text-sm opacity-80"
                   style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
                   Curtidas
@@ -865,8 +858,8 @@ export function TestimonialsSection({
                 <div
                   className="text-3xl font-bold mb-2"
                   style={{
-                    color: template.colors.primary,
-                    fontFamily: template.fonts.heading
+                    color: themeStyles.primary,
+                    fontFamily: themeStyles.fontSecondary
                   }}
                 >
                   {(mockTestimonials.reduce((sum, t) => sum + (t.rating || 0), 0) / mockTestimonials.length).toFixed(1)}
@@ -874,8 +867,8 @@ export function TestimonialsSection({
                 <p
                   className="text-sm opacity-80"
                   style={{
-                    color: template.colors.textSecondary,
-                    fontFamily: template.fonts.body
+                    color: themeStyles.textSecondary,
+                    fontFamily: themeStyles.fontPrimary
                   }}
                 >
                   Avaliação

@@ -83,6 +83,16 @@ export interface HeroSectionData {
   enableAutoplay?: boolean;
 }
 
+// Nova Hero Section com background image e mais campos
+export interface NewHeroSectionData {
+  brideName: EditableField;
+  groomName: EditableField;
+  weddingDate: EditableField;
+  location: EditableField;
+  subtitle?: EditableField;
+  backgroundImage?: EditableField;
+}
+
 export interface InvitationSectionData {
   title: EditableField;
   message: EditableField;

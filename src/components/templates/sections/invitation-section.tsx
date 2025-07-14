@@ -6,6 +6,7 @@ import { Heart, Mail, MessageCircle, Sparkles } from 'lucide-react';
 import { TemplateSection, WeddingTemplate, InvitationSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface InvitationSectionProps {
   section: TemplateSection;
@@ -21,6 +22,7 @@ export function InvitationSection({
   onFieldUpdate
 }: InvitationSectionProps) {
   const data = section.data as InvitationSectionData;
+  const themeStyles = getThemeStyles(template);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,8 +53,8 @@ export function InvitationSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Pattern */}
@@ -107,7 +109,7 @@ export function InvitationSection({
           <motion.div
             className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
             style={{
-              background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.accent})`
+              background: themeStyles.primaryGradient
             }}
             variants={heartVariants}
             initial="hidden"
@@ -143,12 +145,8 @@ export function InvitationSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
               style={{
-                fontFamily: template.fonts.heading,
-                color: template.colors.primary,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -156,11 +154,8 @@ export function InvitationSection({
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title.value}
@@ -184,8 +179,8 @@ export function InvitationSection({
                 onSave={(value) => onFieldUpdate('message', String(value))}
                 className="text-lg md:text-xl leading-relaxed mb-8"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
                 template={template}
               />
@@ -193,8 +188,8 @@ export function InvitationSection({
               <div
                 className="text-lg md:text-xl leading-relaxed mb-8"
                 style={{
-                  fontFamily: template.fonts.body,
-                  color: template.colors.textSecondary,
+                  fontFamily: themeStyles.fontPrimary,
+                  color: themeStyles.textSecondary,
                 }}
                 dangerouslySetInnerHTML={{ __html: data.message.value }}
               />
@@ -211,24 +206,23 @@ export function InvitationSection({
           viewport={{ once: true, margin: "-100px" }}
         >
           <div
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl border-2 mx-auto max-w-2xl"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl mx-auto max-w-2xl"
             style={{
-              borderColor: `${template.colors.accent}40`,
-              boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+              boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
             }}
           >
             {/* Decorative Corner Elements */}
             <div className="absolute top-4 left-4 w-8 h-8 opacity-20">
-              <Sparkles className="w-full h-full" style={{ color: template.colors.primary }} />
+              <Sparkles className="w-full h-full" style={{ color: themeStyles.primary }} />
             </div>
             <div className="absolute top-4 right-4 w-8 h-8 opacity-20">
-              <Sparkles className="w-full h-full" style={{ color: template.colors.primary }} />
+              <Sparkles className="w-full h-full" style={{ color: themeStyles.primary }} />
             </div>
             <div className="absolute bottom-4 left-4 w-8 h-8 opacity-20">
-              <Sparkles className="w-full h-full" style={{ color: template.colors.primary }} />
+              <Sparkles className="w-full h-full" style={{ color: themeStyles.primary }} />
             </div>
             <div className="absolute bottom-4 right-4 w-8 h-8 opacity-20">
-              <Sparkles className="w-full h-full" style={{ color: template.colors.primary }} />
+              <Sparkles className="w-full h-full" style={{ color: themeStyles.primary }} />
             </div>
 
             <div className="text-center">
@@ -239,8 +233,8 @@ export function InvitationSection({
                   onSave={(value) => onFieldUpdate('formalMessage', String(value))}
                   className="text-base md:text-lg leading-relaxed mb-8 italic"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.text,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.text,
                   }}
                   template={template}
                 />
@@ -248,8 +242,8 @@ export function InvitationSection({
                 <p
                   className="text-base md:text-lg leading-relaxed mb-8 italic"
                   style={{
-                    fontFamily: template.fonts.body,
-                    color: template.colors.text,
+                    fontFamily: themeStyles.fontPrimary,
+                    color: themeStyles.text,
                   }}
                 >
                   {data.formalMessage.value}
@@ -260,7 +254,7 @@ export function InvitationSection({
               <div className="relative">
                 <div
                   className="w-20 h-px bg-current opacity-30 mx-auto mb-4"
-                  style={{ color: template.colors.primary }}
+                  style={{ color: themeStyles.primary }}
                 />
                 {isEditable ? (
                   <InlineEditor
@@ -269,8 +263,8 @@ export function InvitationSection({
                     onSave={(value) => onFieldUpdate('signature', String(value))}
                     className="text-lg md:text-xl font-medium"
                     style={{
-                      fontFamily: template.fonts.script || template.fonts.heading,
-                      color: template.colors.primary,
+                      fontFamily: themeStyles.fontAccent,
+                      color: themeStyles.primary,
                     }}
                     template={template}
                   />
@@ -278,8 +272,8 @@ export function InvitationSection({
                   <p
                     className="text-lg md:text-xl font-medium"
                     style={{
-                      fontFamily: template.fonts.script || template.fonts.heading,
-                      color: template.colors.primary,
+                      fontFamily: themeStyles.fontAccent,
+                      color: themeStyles.primary,
                     }}
                   >
                     {data.signature.value}
@@ -330,16 +324,16 @@ export function InvitationSection({
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
             >
-              <div className="aspect-[3/2] border-2 border-dashed rounded-2xl flex items-center justify-center bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70"
-                style={{ borderColor: template.colors.primary + '40' }}>
+              <div className="aspect-[3/2] border-dashed border-2 border-gray-300 rounded-2xl flex items-center justify-center bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70"
+                style={{ borderColor: themeStyles.primary + '40' }}>
                 <div className="text-center p-8">
                   <MessageCircle 
                     className="w-12 h-12 mx-auto mb-4 opacity-50"
-                    style={{ color: template.colors.primary }}
+                    style={{ color: themeStyles.primary }}
                   />
                   <p 
                     className="text-sm font-medium opacity-70"
-                    style={{ color: template.colors.text }}
+                    style={{ color: themeStyles.text }}
                   >
                     Clique para adicionar imagem do convite
                   </p>
@@ -367,7 +361,7 @@ export function InvitationSection({
           >
             <div
               className="w-12 h-px bg-current opacity-20"
-              style={{ color: template.colors.primary }}
+              style={{ color: themeStyles.primary }}
             />
             <motion.div
               variants={itemVariants}
@@ -386,12 +380,12 @@ export function InvitationSection({
             >
               <Heart 
                 className="w-6 h-6"
-                style={{ color: template.colors.primary }}
+                style={{ color: themeStyles.primary }}
               />
             </motion.div>
             <div
               className="w-12 h-px bg-current opacity-20"
-              style={{ color: template.colors.primary }}
+              style={{ color: themeStyles.primary }}
             />
           </motion.div>
         </motion.div>

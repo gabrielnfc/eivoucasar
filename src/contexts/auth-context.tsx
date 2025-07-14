@@ -8,15 +8,17 @@ import type { AuthUser } from '@/lib/auth';
 interface AuthContextType {
 	user: AuthUser | null;
 	loading: boolean;
+	initialized: boolean;
 	signOut: () => Promise<void>;
 	refreshUser: () => Promise<void>;
+	checkAuth: () => Promise<void>; // Nova função para verificação sob demanda
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false); // Não começar carregando
 	const [initialized, setInitialized] = useState(false);
 
 	// Use a single instance throughout the component
@@ -24,6 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	const refreshUser = useCallback(async () => {
 		try {
+			setLoading(true);
+			
 			const {
 				data: { user: authUser },
 				error,
@@ -31,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 			if (error) {
 				console.error('AuthContext: Erro ao buscar usuário:', error);
-				// Só deslogar se for erro de token inválido
+				// Só deslogar se for erro de token inválido, não de sessão missing
 				if (error.message.includes('invalid') || error.message.includes('expired')) {
 					setUser(null);
 				}
@@ -78,51 +82,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setUser(userData);
 		} catch (error) {
 			console.error('AuthContext: Erro ao atualizar usuário:', error);
-			// Não deslogar por erro de rede - manter usuário logado
+			// Em caso de erro de rede, não alterar estado do usuário
+		} finally {
+			setLoading(false);
 		}
 	}, [supabase]);
 
+	// Nova função para verificação sob demanda
+	const checkAuth = useCallback(async () => {
+		if (initialized) return; // Só verificar uma vez
+		
+		try {
+			setLoading(true);
+			
+			// Verificar se existe sessão ativa (sem forçar erro)
+			const { data: { session }, error } = await supabase.auth.getSession();
+			
+			if (error) {
+				console.log('AuthContext: Sem sessão ativa:', error.message);
+				setUser(null);
+				return;
+			}
+
+			if (session?.user) {
+				// Só buscar dados completos se existe sessão
+				await refreshUser();
+			} else {
+				setUser(null);
+			}
+		} catch (error) {
+			console.log('AuthContext: Erro ao verificar sessão:', error);
+			setUser(null);
+		} finally {
+			setLoading(false);
+			setInitialized(true);
+		}
+	}, [supabase, refreshUser, initialized]);
+
 	const handleSignOut = async () => {
 		try {
+			setLoading(true);
 			await supabase.auth.signOut();
 			setUser(null);
+			setInitialized(false); // Reset para permitir nova verificação
 		} catch (error) {
 			console.error('Error signing out:', error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	useEffect(() => {
 		let isMounted = true;
 
-		const initializeAuth = async () => {
-			try {
-				// Verificar usuário inicial
-				await refreshUser();
-			} catch (error) {
-				console.error('Erro na inicialização de auth:', error);
-			} finally {
-				if (isMounted) {
-					setLoading(false);
-					setInitialized(true);
-				}
-			}
-		};
-
-		// Só inicializar se ainda não foi inicializado
-		if (!initialized) {
-			initializeAuth();
-		}
-
-		// Listen para mudanças de auth apenas após inicialização
+		// Verificação passiva de mudanças de auth (não força verificação inicial)
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-			if (!initialized) return; // Ignorar eventos durante inicialização
+			if (!isMounted) return;
+
+			console.log('AuthContext: Auth state change:', event);
 
 			if (event === 'SIGNED_IN' && session?.user) {
 				await refreshUser();
 			} else if (event === 'SIGNED_OUT') {
 				setUser(null);
+				setInitialized(false);
+			} else if (event === 'TOKEN_REFRESHED' && session?.user) {
+				// Token foi renovado, atualizar dados do usuário
+				await refreshUser();
 			}
 		});
 
@@ -130,13 +158,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			isMounted = false;
 			subscription.unsubscribe();
 		};
-	}, [supabase, refreshUser, initialized]);
+	}, [supabase, refreshUser]);
 
 	const value = {
 		user,
 		loading,
+		initialized,
 		signOut: handleSignOut,
 		refreshUser,
+		checkAuth, // Nova função exportada
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -148,4 +178,18 @@ export function useAuth() {
 		throw new Error('useAuth must be used within an AuthProvider');
 	}
 	return context;
+}
+
+// Hook especializado para páginas que NECESSITAM de autenticação
+export function useRequireAuth() {
+	const auth = useAuth();
+	
+	useEffect(() => {
+		// Verificar autenticação quando hook for usado
+		if (!auth.initialized) {
+			auth.checkAuth();
+		}
+	}, [auth]);
+
+	return auth;
 }

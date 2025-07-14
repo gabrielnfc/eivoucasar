@@ -24,6 +24,7 @@ import {
 import { TemplateSection, WeddingTemplate, RSVPSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { cn } from '@/lib/utils';
+import { getThemeStyles } from '@/lib/utils/theme-utils';
 
 interface RSVPSectionProps {
   section: TemplateSection;
@@ -67,6 +68,7 @@ export function RSVPSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const themeStyles = getThemeStyles(template);
 
   // Calcula dias restantes para o deadline
   const deadlineDate = new Date(data.deadline?.value || Date.now());
@@ -192,8 +194,8 @@ export function RSVPSection({
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       style={{
-        backgroundColor: section.style.backgroundColor || template.colors.background,
-        color: section.style.textColor || template.colors.text,
+        backgroundColor: section.style.backgroundColor || themeStyles.background,
+        color: section.style.textColor || themeStyles.text,
       }}
     >
       {/* Background Effects */}
@@ -202,8 +204,8 @@ export function RSVPSection({
         <div
           className="absolute inset-0 opacity-10"
           style={{
-            background: `radial-gradient(circle at 30% 70%, ${template.colors.primary}, transparent 60%),
-                        radial-gradient(circle at 70% 30%, ${template.colors.secondary}, transparent 60%)`
+            background: `radial-gradient(circle at 30% 70%, ${themeStyles.primary}, transparent 60%),
+                        radial-gradient(circle at 70% 30%, ${themeStyles.secondary}, transparent 60%)`
           }}
         />
 
@@ -247,11 +249,8 @@ export function RSVPSection({
               onSave={(value) => onFieldUpdate('title', String(value))}
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
               template={template}
             />
@@ -259,11 +258,8 @@ export function RSVPSection({
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
               style={{
-                fontFamily: template.fonts.heading,
-                background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                fontFamily: themeStyles.fontSecondary,
+                color: themeStyles.primary,
               }}
             >
               {data.title?.value || ''}
@@ -277,8 +273,8 @@ export function RSVPSection({
               onSave={(value) => onFieldUpdate('subtitle', String(value))}
               className="text-lg md:text-xl max-w-2xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
               template={template}
             />
@@ -286,8 +282,8 @@ export function RSVPSection({
             <p
               className="text-lg md:text-xl max-w-2xl mx-auto mb-8"
               style={{
-                fontFamily: template.fonts.body,
-                color: template.colors.textSecondary,
+                fontFamily: themeStyles.fontPrimary,
+                color: themeStyles.textSecondary,
               }}
             >
               {data.subtitle?.value || ''}
@@ -302,19 +298,19 @@ export function RSVPSection({
             <div
               className="flex items-center gap-2 px-4 py-2 rounded-full border-2"
               style={{
-                borderColor: `${template.colors.primary}40`,
-                backgroundColor: `${template.colors.primary}10`,
+                borderColor: `${themeStyles.primary}40`,
+                backgroundColor: `${themeStyles.primary}10`,
               }}
             >
               <Clock 
                 className="w-5 h-5"
-                style={{ color: template.colors.primary }}
+                style={{ color: themeStyles.primary }}
               />
               <span
                 className="font-medium"
                 style={{
-                  color: template.colors.primary,
-                  fontFamily: template.fonts.body
+                  color: themeStyles.primary,
+                  fontFamily: themeStyles.fontPrimary
                 }}
               >
                 {daysRemaining > 0 
@@ -333,8 +329,8 @@ export function RSVPSection({
               key="form"
               className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border"
               style={{
-                borderColor: `${template.colors.primary}20`,
-                boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                borderColor: `${themeStyles.primary}20`,
+                boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
               }}
               variants={formVariants}
               initial="hidden"
@@ -348,8 +344,8 @@ export function RSVPSection({
                     <h3
                       className="text-xl font-bold flex items-center gap-2"
                       style={{
-                        color: template.colors.primary,
-                        fontFamily: template.fonts.heading
+                        color: themeStyles.primary,
+                        fontFamily: themeStyles.fontSecondary
                       }}
                     >
                       <User className="w-5 h-5" />
@@ -366,9 +362,13 @@ export function RSVPSection({
                           value={formData.name}
                           onChange={(e) => handleInputChange('name', e.target.value)}
                           className={cn(
-                            "w-full px-4 py-3 rounded-xl border-2 transition-all duration-200",
-                            errors.name ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-blue-400"
+                            "w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                           )}
+                          style={{
+                            backgroundColor: 'white',
+                            boxShadow: `0 4px 12px -2px ${themeStyles.primary}15`,
+                            borderColor: 'transparent'
+                          }}
                           placeholder="Seu nome completo"
                         />
                         {errors.name && (
@@ -388,9 +388,13 @@ export function RSVPSection({
                           value={formData.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}
                           className={cn(
-                            "w-full px-4 py-3 rounded-xl border-2 transition-all duration-200",
-                            errors.email ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-blue-400"
+                            "w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                           )}
+                          style={{
+                            backgroundColor: 'white',
+                            boxShadow: `0 4px 12px -2px ${themeStyles.primary}15`,
+                            borderColor: 'transparent'
+                          }}
                           placeholder="seu@email.com"
                         />
                         {errors.email && (
@@ -409,7 +413,12 @@ export function RSVPSection({
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => handleInputChange('phone', e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-400 transition-all duration-200"
+                          className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                          style={{
+                            backgroundColor: 'white',
+                            boxShadow: `0 4px 12px -2px ${themeStyles.primary}15`,
+                            borderColor: 'transparent'
+                          }}
                           placeholder="(11) 99999-9999"
                         />
                       </div>
@@ -421,8 +430,8 @@ export function RSVPSection({
                     <h3
                       className="text-xl font-bold flex items-center gap-2"
                       style={{
-                        color: template.colors.primary,
-                        fontFamily: template.fonts.heading
+                        color: themeStyles.primary,
+                        fontFamily: themeStyles.fontSecondary
                       }}
                     >
                       <Calendar className="w-5 h-5" />
@@ -605,8 +614,8 @@ export function RSVPSection({
                     <h3
                       className="text-xl font-bold flex items-center gap-2"
                       style={{
-                        color: template.colors.primary,
-                        fontFamily: template.fonts.heading
+                        color: themeStyles.primary,
+                        fontFamily: themeStyles.fontSecondary
                       }}
                     >
                       <MessageSquare className="w-5 h-5" />
@@ -615,7 +624,12 @@ export function RSVPSection({
                     <textarea
                       value={formData.message}
                       onChange={(e) => handleInputChange('message', e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-400 transition-all duration-200 resize-none"
+                      className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                      style={{
+                        backgroundColor: 'white',
+                        boxShadow: `0 4px 12px -2px ${themeStyles.primary}15`,
+                        borderColor: 'transparent'
+                      }}
                       rows={4}
                       placeholder="Deixe uma mensagem carinhosa para os noivos..."
                     />
@@ -628,7 +642,7 @@ export function RSVPSection({
                       disabled={isSubmitting}
                       className="w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
                       style={{
-                        background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
+                        background: themeStyles.primaryGradient,
                         opacity: isSubmitting ? 0.7 : 1
                       }}
                       whileHover={{ scale: 1.02, y: -2 }}
@@ -666,8 +680,8 @@ export function RSVPSection({
               key="success"
               className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border text-center py-16 px-8"
               style={{
-                borderColor: `${template.colors.primary}20`,
-                boxShadow: `0 25px 50px -12px ${template.colors.primary}20`
+                borderColor: `${themeStyles.primary}20`,
+                boxShadow: `0 25px 50px -12px ${themeStyles.primary}20`
               }}
               variants={successVariants as any}
               initial="hidden"
@@ -690,8 +704,8 @@ export function RSVPSection({
               <h3
                 className="text-3xl font-bold mb-4"
                 style={{
-                  color: template.colors.primary,
-                  fontFamily: template.fonts.heading
+                  color: themeStyles.primary,
+                  fontFamily: themeStyles.fontSecondary
                 }}
               >
                 Confirmação Enviada! 🎉
@@ -700,8 +714,8 @@ export function RSVPSection({
               <p
                 className="text-lg mb-8 max-w-md mx-auto"
                 style={{
-                  color: template.colors.textSecondary,
-                  fontFamily: template.fonts.body
+                  color: themeStyles.textSecondary,
+                  fontFamily: themeStyles.fontPrimary
                 }}
               >
                 Obrigado por confirmar sua presença! Em breve entraremos em contato com mais detalhes.
@@ -711,8 +725,8 @@ export function RSVPSection({
                 onClick={resetForm}
                 className="px-6 py-3 rounded-full border-2 text-sm font-medium transition-all duration-300"
                 style={{
-                  borderColor: template.colors.primary,
-                  color: template.colors.primary
+                  borderColor: themeStyles.primary,
+                  color: themeStyles.primary
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
