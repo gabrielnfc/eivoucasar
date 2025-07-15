@@ -42,17 +42,14 @@ export default function WeddingHero() {
       <RomanticDecorations variant="hero" />
       
       {/* Cover photo background */}
-      {couple.cover_photo && (
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={couple.cover_photo}
-            alt={`Foto do casal ${couple.bride_name} e ${couple.groom_name}`}
-            fill
-            className="object-cover opacity-20"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/60 to-white/80" />
-        </div>
+      {couple.cover_photo_url && (
+        <Image
+          className="absolute inset-0 w-full h-full object-cover"
+          src={couple.cover_photo_url}
+          alt={`Foto do casal ${couple.bride_name} e ${couple.groom_name}`}
+          fill
+          priority
+        />
       )}
       
       {/* Main content */}

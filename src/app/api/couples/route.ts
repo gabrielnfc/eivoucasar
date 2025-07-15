@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { formToDbData, validateRequiredFields } from '@/lib/utils/field-mapping'
 
 const updateCoupleSchema = z.object({
   bride_name: z.string().min(1, 'Nome da noiva é obrigatório'),
@@ -9,11 +10,12 @@ const updateCoupleSchema = z.object({
   wedding_time: z.string().optional(),
   wedding_location: z.string().optional(),
   wedding_address: z.string().optional(),
-  invitation_message: z.string().optional(),
-  couple_story: z.string().optional(),
+  formal_invitation_message: z.string().optional(),
   bride_photo: z.string().optional(),
   groom_photo: z.string().optional(),
-  cover_photo: z.string().optional(),
+  cover_photo_url: z.string().optional(),
+  couple_photo: z.string().optional(),
+  hero_background_image: z.string().optional(),
   theme_color: z.string().optional(),
   slug: z.string().min(1, 'URL personalizada é obrigatória')
     .regex(/^[a-z0-9-]+$/, 'URL deve conter apenas letras minúsculas, números e hífens')
@@ -32,18 +34,8 @@ export async function PUT(request: NextRequest) {
     
     const supabase = await createClient()
     
-    // Set the session first
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: ''
-    })
-    
-    if (sessionError) {
-      console.log('Session error:', sessionError)
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
-    
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    // Get user directly from token
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
     
     if (userError || !user) {
       console.log('User validation failed:', userError)
@@ -62,13 +54,22 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const data = validation.data
+    const formData = validation.data
+
+    // Validar campos obrigatórios
+    const { isValid, errors } = validateRequiredFields(formData)
+    if (!isValid) {
+      return NextResponse.json({ 
+        error: 'Campos obrigatórios não preenchidos', 
+        details: errors 
+      }, { status: 400 })
+    }
 
     // Check if slug is already taken by another couple
     const { data: existingCouple, error: slugError } = await supabase
       .from('couples')
       .select('id')
-      .eq('slug', data.slug)
+      .eq('slug', formData.slug)
       .neq('user_id', user.id)
       .single()
 
@@ -82,11 +83,14 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Converter dados do formulário para o formato do banco
+    const dbData = formToDbData(formData)
+
     // Update couple data
     const { data: updatedCouple, error } = await supabase
       .from('couples')
       .update({
-        ...data,
+        ...dbData,
         updated_at: new Date().toISOString()
       })
       .eq('user_id', user.id)

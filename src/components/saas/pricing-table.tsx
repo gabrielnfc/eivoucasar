@@ -80,13 +80,13 @@ export default function PricingTable() {
     if (user) {
       // Usuário logado - ir direto para checkout
       window.location.href = `/checkout?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`
-    } else {
+			} else {
       // Usuário não logado - ir para signup com plano selecionado
       window.location.href = `/signup?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`
-    }
+		}
   }
 
-  return (
+	return (
     <div className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -103,7 +103,7 @@ export default function PricingTable() {
             <span className={`text-sm ${!isYearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
               Mensal
             </span>
-            <button
+					<button
               onClick={() => setIsYearly(!isYearly)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 isYearly ? 'bg-primary-500' : 'bg-gray-200'
@@ -112,22 +112,22 @@ export default function PricingTable() {
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                   isYearly ? 'translate-x-6' : 'translate-x-1'
-                }`}
+						}`}
               />
-            </button>
+					</button>
             <span className={`text-sm ${isYearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-              Anual
+						Anual
             </span>
             {isYearly && (
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
                 Economize 17%
-              </span>
+						</span>
             )}
-          </div>
-        </div>
+				</div>
+			</div>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+			{/* Plans Grid */}
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -136,78 +136,78 @@ export default function PricingTable() {
               transition={{ delay: index * 0.1 }}
               className={`relative bg-white rounded-2xl shadow-lg overflow-hidden ${
                 plan.popular ? 'ring-2 ring-primary-500 transform scale-105' : ''
-              }`}
-            >
+							}`}
+						>
               {plan.popular && (
                 <div className="absolute top-0 left-0 right-0 bg-primary-500 text-white text-center py-2 text-sm font-medium">
-                  Mais Popular
-                </div>
-              )}
+										Mais Popular
+								</div>
+							)}
 
               <div className={`p-8 ${plan.popular ? 'pt-16' : ''}`}>
-                {/* Plan Header */}
-                <div className="text-center mb-8">
+							{/* Plan Header */}
+							<div className="text-center mb-8">
                   <div className="flex justify-center mb-4 text-primary-500">
                     {plan.icon}
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-6">{plan.description}</p>
-                  
+
                   {/* Price */}
-                  <div className="mb-6">
-                    <div className="flex items-baseline justify-center">
+								<div className="mb-6">
+									<div className="flex items-baseline justify-center">
                       <span className="text-4xl font-bold text-gray-900">
                         R$ {isYearly ? plan.price.yearly.toFixed(0) : plan.price.monthly.toFixed(2)}
-                      </span>
+										</span>
                       <span className="text-gray-500 ml-1">
                         /{isYearly ? 'ano' : 'mês'}
-                      </span>
-                    </div>
+										</span>
+									</div>
                     {isYearly && (
                       <p className="text-sm text-gray-500 mt-1">
                         R$ {(plan.price.yearly / 12).toFixed(2)}/mês
-                      </p>
-                    )}
-                  </div>
+										</p>
+									)}
+								</div>
 
                   {/* CTA Button */}
-                  <Button
+								<Button
                     onClick={() => handleSelectPlan(plan.id)}
                     className={`w-full ${
                       plan.popular
                         ? 'bg-primary-500 hover:bg-primary-600 text-white'
                         : 'bg-gray-900 hover:bg-gray-800 text-white'
-                    }`}
-                  >
+									}`}
+								>
                     {user ? 'Assinar Agora' : 'Começar Grátis'}
-                  </Button>
-                </div>
+								</Button>
+							</div>
 
-                {/* Features List */}
-                <div className="space-y-4">
+							{/* Features List */}
+							<div className="space-y-4">
                   {plan.features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-start space-x-3">
                       <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-600 text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+									</div>
+								))}
+							</div>
+									</div>
             </motion.div>
           ))}
-        </div>
+			</div>
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
           <p className="text-gray-600 mb-4">
             Não tem certeza qual plano escolher? Comece com o teste grátis de 14 dias.
-          </p>
+				</p>
           <Button variant="outline" onClick={() => handleSelectPlan('basic')}>
             Teste Grátis por 14 Dias
           </Button>
         </div>
-      </div>
-    </div>
+			</div>
+		</div>
   )
 }
  

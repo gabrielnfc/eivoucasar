@@ -3,38 +3,95 @@ import { WeddingTemplate } from '@/types/template';
 interface CoupleData {
   id: string;
   slug: string;
-  brideName: string;
-  groomName: string;
-  weddingDate: string;
-  weddingDateTime: string;
-  ceremonyVenue?: string;
-  receptionVenue?: string;
-  welcomeMessage?: string;
-  story?: string;
-  coverPhotoUrl?: string;
-  themeColors?: any;
+  bride_name: string;
+  groom_name: string;
+  wedding_date: string;
+  wedding_time?: string;
+  wedding_location?: string;
+  wedding_address?: string;
+  invitation_message?: string;
+  couple_story?: string;
+  bride_photo?: string;
+  groom_photo?: string;
+  cover_photo_url?: string;
+  hero_background_image?: string;
+  couple_photo?: string;
+  theme_color?: string;
   email: string;
-  emailSecondary?: string;
+  email_secondary?: string;
   city: string;
   state: string;
   country?: string;
-  bridePhone?: string;
-  groomPhone?: string;
-  isActive: boolean;
-  isPublished: boolean;
+  bride_phone?: string;
+  groom_phone?: string;
+  is_active: boolean;
+  is_published: boolean;
 }
 
-export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
-  const coupleNames = `${coupleData.brideName} & ${coupleData.groomName}`;
-  const weddingDateFormatted = new Date(coupleData.weddingDateTime).toLocaleDateString('pt-BR', {
+// Helper function to safely handle wedding dates
+function getValidWeddingDate(dateString: string | null | undefined): Date {
+  if (!dateString) {
+    // Return a future date if no date is provided
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    return futureDate;
+  }
+
+  const date = new Date(dateString);
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    // Return a future date if the date is invalid
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    return futureDate;
+  }
+
+  return date;
+}
+
+// Helper function to safely format wedding date
+function formatWeddingDate(dateString: string | null | undefined): string {
+  const date = getValidWeddingDate(dateString);
+  return date.toLocaleDateString('pt-BR', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+}
+
+// Helper function to safely get date string for inputs
+function getDateInputValue(dateString: string | null | undefined): string {
+  const date = getValidWeddingDate(dateString);
+  return date.toISOString().split('T')[0];
+}
+
+// Helper function to safely get time string
+function getTimeInputValue(dateString: string | null | undefined, timeString?: string): string {
+  if (timeString) {
+    return timeString;
+  }
   
-  const locationText = `${coupleData.city}, ${coupleData.state}`;
-  const themeColors = coupleData.themeColors || {
+  const date = getValidWeddingDate(dateString);
+  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
+  console.log('🏗️ createRealTemplate: Recebendo dados:', coupleData);
+  console.log('🖼️ createRealTemplate: hero_background_image:', coupleData.hero_background_image);
+  
+  const coupleNames = `${coupleData.bride_name} & ${coupleData.groom_name}`;
+  const weddingDateFormatted = formatWeddingDate(coupleData.wedding_date);
+  
+  const locationText = coupleData.wedding_location || `${coupleData.city}, ${coupleData.state}`;
+  const themeColors = coupleData.theme_color ? {
+    primary: coupleData.theme_color,
+    secondary: coupleData.theme_color,
+    accent: coupleData.theme_color,
+    background: '#fef2f2',
+    text: '#1f2937'
+  } : {
     primary: '#be185d',
     secondary: '#ec4899',
     accent: '#f97316',
@@ -42,18 +99,22 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
     text: '#1f2937'
   };
 
+  const heroBackgroundImage = coupleData.hero_background_image || '/image/template_layout.jpg';
+  console.log('🎨 createRealTemplate: heroBackgroundImage final:', heroBackgroundImage);
+
   return {
-    id: `template-${coupleData.id}`,
+    id: coupleData.id,
     name: `Template de ${coupleNames}`,
-    description: `Template personalizado para o casamento de ${coupleNames}`,
+    
+    description: `Celebre conosco o casamento de ${coupleNames}`,
     category: 'Custom',
-    preview: coupleData.coverPhotoUrl || '/api/placeholder/800/600',
+    preview: coupleData.cover_photo_url || '/image/template_layout.jpg',
     colors: {
-      primary: themeColors.primary || '#be185d',
-      secondary: themeColors.secondary || '#ec4899',
-      accent: themeColors.accent || '#f97316',
-      background: themeColors.background || '#fef2f2',
-      text: themeColors.text || '#1f2937',
+      primary: themeColors.primary,
+      secondary: themeColors.secondary,
+      accent: themeColors.accent,
+      background: themeColors.background,
+      text: themeColors.text,
       textSecondary: '#6b7280',
       success: '#10b981',
       warning: '#f59e0b',
@@ -67,12 +128,12 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
     sections: [
       {
         id: 'hero',
-        name: 'Hero',
         type: 'hero',
+        name: 'Seção Principal',
         component: 'HeroSection',
         editable: true,
         required: true,
-        order: 0,
+        order: 1,
         enabled: true,
         layout: {
           type: 'full',
@@ -82,46 +143,36 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           spacing: 'normal'
         },
         style: {
-          backgroundColor: '#000000',
-          textColor: '#ffffff'
+          backgroundColor: '#fef2f2',
+          textColor: '#1f2937'
         },
         data: {
-          brideName: { id: 'brideName', type: 'text', value: coupleData.brideName },
-          groomName: { id: 'groomName', type: 'text', value: coupleData.groomName },
-          weddingDate: { 
-            id: 'weddingDate', 
-            type: 'text', 
-            value: new Date(coupleData.weddingDateTime).toLocaleDateString('pt-BR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })
-          },
+          brideName: { id: 'brideName', type: 'text', value: coupleData.bride_name },
+          groomName: { id: 'groomName', type: 'text', value: coupleData.groom_name },
+          weddingDate: { id: 'weddingDate', type: 'text', value: weddingDateFormatted },
           location: { id: 'location', type: 'text', value: locationText },
-          subtitle: { id: 'subtitle', type: 'text', value: 'Celebre conosco este momento único e especial' },
-          backgroundImage: { id: 'backgroundImage', type: 'image', value: coupleData.coverPhotoUrl || '' }
+          subtitle: { id: 'subtitle', type: 'text', value: coupleData.invitation_message || 'Venha celebrar conosco o nosso grande dia!' },
+          backgroundImage: { id: 'backgroundImage', type: 'image', value: heroBackgroundImage }
         },
         settings: {
-          showTitle: false,
+          showTitle: true,
           showSubtitle: true,
-          showDivider: false,
           animation: 'fade'
         }
       },
       {
         id: 'invitation',
-        name: 'Convite',
         type: 'invitation',
+        name: 'Convite',
         component: 'InvitationSection',
         editable: true,
-        required: true,
-        order: 1,
+        required: false,
+        order: 2,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -131,39 +182,30 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: 'Você está convidado!' },
-          message: { 
-            id: 'message', 
-            type: 'textarea', 
-            value: coupleData.welcomeMessage || 'Com grande alegria, convidamos você para celebrar conosco este momento único e especial.' 
-          },
-          formalMessage: { 
-            id: 'formalMessage', 
-            type: 'textarea', 
-            value: `${coupleData.brideName} & ${coupleData.groomName} têm a honra de convidar para sua cerimônia de casamento.` 
-          },
+          message: { id: 'message', type: 'textarea', value: coupleData.invitation_message || 'É com grande alegria que convidamos você para celebrar conosco o nosso casamento. Sua presença é muito importante para nós e tornará este dia ainda mais especial.' },
+          formalMessage: { id: 'formalMessage', type: 'textarea', value: `${coupleData.bride_name} & ${coupleData.groom_name} têm a honra de convidar você para sua cerimônia de casamento em ${formatWeddingDate(coupleData.wedding_date)} às ${getTimeInputValue(coupleData.wedding_date, coupleData.wedding_time)} em ${locationText}.` },
           signature: { id: 'signature', type: 'text', value: `Com amor, ${coupleNames}` },
-          invitationImage: { id: 'invitationImage', type: 'image', value: coupleData.coverPhotoUrl || '/api/placeholder/600/400' }
+          invitationImage: { id: 'invitationImage', type: 'image', value: coupleData.cover_photo_url || '/image/template_layout.jpg' }
         },
         settings: {
           showTitle: true,
           showSubtitle: true,
-          showDivider: true,
-          animation: 'fade'
+          animation: 'slide'
         }
       },
       {
         id: 'countdown',
-        name: 'Countdown',
         type: 'countdown',
+        name: 'Contagem Regressiva',
         component: 'CountdownSection',
         editable: true,
         required: false,
-        order: 2,
+        order: 3,
         enabled: true,
         layout: {
           type: 'container',
           background: 'colored',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -172,33 +214,29 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Faltam poucos dias!' },
-          targetDate: { id: 'targetDate', type: 'date', value: coupleData.weddingDateTime },
-          message: { id: 'message', type: 'text', value: 'Contagem regressiva para o nosso grande dia' },
-          completedMessage: { id: 'completedMessage', type: 'text', value: 'Hoje é o grande dia! 🎉' },
-          showDays: true,
-          showHours: true,
-          showMinutes: true,
-          showSeconds: true
+          title: { id: 'title', type: 'text', value: 'Faltam apenas...' },
+          targetDate: { id: 'targetDate', type: 'date', value: getDateInputValue(coupleData.wedding_date) },
+          message: { id: 'message', type: 'textarea', value: 'Dias para o nosso grande dia!' }
         },
         settings: {
           showTitle: true,
+          showSubtitle: true,
           animation: 'slide'
         }
       },
       {
         id: 'story',
-        name: 'Nossa História',
         type: 'story',
+        name: 'Nossa História',
         component: 'StorySection',
         editable: true,
         required: false,
-        order: 3,
+        order: 4,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'loose'
         },
@@ -208,45 +246,42 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: 'Nossa História de Amor' },
-          story: { 
-            id: 'story', 
-            type: 'textarea', 
-            value: coupleData.story || 'Nossa história de amor começou de forma especial e única...' 
-          },
-          coupleImage: { id: 'coupleImage', type: 'image', value: coupleData.coverPhotoUrl || '/api/placeholder/600/400' },
+          story: { id: 'story', type: 'textarea', value: coupleData.couple_story || 'Nossa história de amor começou de forma especial e única...' },
+          image: { id: 'image', type: 'image', value: coupleData.cover_photo_url || '/image/template_layout.jpg' },
           timeline: [
             {
-              date: { id: 'date1', type: 'date', value: '2020-03-15' },
-              title: { id: 'title1', type: 'text', value: 'Primeiro Encontro' },
-              description: { id: 'desc1', type: 'textarea', value: 'Nos conhecemos e foi amor à primeira vista.' },
-              image: { id: 'img1', type: 'image', value: '/api/placeholder/300/200' }
+              id: 'timeline_1',
+              title: 'Primeiro Encontro',
+              date: '2020-01-01',
+              description: 'Nos conhecemos em um dia especial...'
             },
             {
-              date: { id: 'date2', type: 'date', value: '2023-12-24' },
-              title: { id: 'title2', type: 'text', value: 'Pedido de Casamento' },
-              description: { id: 'desc2', type: 'textarea', value: 'Uma noite mágica que mudou nossas vidas para sempre.' },
-              image: { id: 'img2', type: 'image', value: '/api/placeholder/300/200' }
+              id: 'timeline_2',
+              title: 'Noivado',
+              date: '2022-06-15',
+              description: 'O pedido de casamento foi mágico...'
             }
           ]
         },
         settings: {
           showTitle: true,
+          showSubtitle: true,
           animation: 'fade'
         }
       },
       {
         id: 'groomsmen',
-        name: 'Padrinhos',
         type: 'groomsmen',
+        name: 'Padrinhos',
         component: 'GroomsmenSection',
         editable: true,
         required: false,
-        order: 4,
+        order: 5,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -255,44 +290,29 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Nossos Queridos' },
-          subtitle: { id: 'subtitle', type: 'text', value: 'Pessoas especiais que estarão ao nosso lado' },
-          groomsmen: [
-            {
-              name: { id: 'name1', type: 'text', value: 'Padrinho do Noivo' },
-              role: { id: 'role1', type: 'text', value: 'Padrinho' },
-              image: { id: 'img1', type: 'image', value: '/api/placeholder/300/300' },
-              description: { id: 'desc1', type: 'textarea', value: 'Uma pessoa muito especial' }
-            }
-          ],
-          bridesmaids: [
-            {
-              name: { id: 'name1', type: 'text', value: 'Madrinha da Noiva' },
-              role: { id: 'role1', type: 'text', value: 'Madrinha' },
-              image: { id: 'img1', type: 'image', value: '/api/placeholder/300/300' },
-              description: { id: 'desc1', type: 'textarea', value: 'Uma pessoa muito especial' }
-            }
-          ]
+          title: { id: 'title', type: 'text', value: 'Nossos Padrinhos' },
+          groomsmen: [],
+          bridesmaids: []
         },
         settings: {
           showTitle: true,
           showSubtitle: true,
-          animation: 'slide'
+          animation: 'fade'
         }
       },
       {
         id: 'gamification',
-        name: 'Contribuições',
         type: 'gamification',
+        name: 'Contribuições',
         component: 'GamificationSection',
         editable: true,
         required: false,
-        order: 5,
+        order: 6,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -302,32 +322,45 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: 'Ajude-nos na Lua de Mel' },
-          subtitle: { id: 'subtitle', type: 'text', value: 'Sua contribuição tornará nossos sonhos realidade' },
+          subtitle: { id: 'subtitle', type: 'text', value: 'Sua contribuição nos ajudará a tornar nossa lua de mel ainda mais especial!' },
+          pixKey: { id: 'pixKey', type: 'text', value: coupleData.email || 'chave-pix@exemplo.com' },
           currentGoal: 0,
-          totalGoal: 15000,
-          pixKey: { id: 'pixKey', type: 'text', value: coupleData.email },
-          groups: [],
-          leaderboard: []
+          totalGoal: 5000,
+          groups: [
+            {
+              name: 'Família',
+              totalContributed: 0,
+              memberCount: 0,
+              avatar: '👨‍👩‍👧‍👦'
+            }
+          ],
+          leaderboard: [
+            {
+              groupName: 'Família',
+              amount: 0,
+              position: 1
+            }
+          ]
         },
         settings: {
           showTitle: true,
           showSubtitle: true,
-          animation: 'zoom'
+          animation: 'fade'
         }
       },
       {
         id: 'rsvp',
-        name: 'Confirmar Presença',
         type: 'rsvp',
+        name: 'Confirmar Presença',
         component: 'RSVPSection',
         editable: true,
         required: false,
-        order: 6,
+        order: 7,
         enabled: true,
         layout: {
           type: 'container',
           background: 'colored',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -338,7 +371,11 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         data: {
           title: { id: 'title', type: 'text', value: 'Confirme sua Presença' },
           subtitle: { id: 'subtitle', type: 'text', value: 'Sua presença é muito importante para nós!' },
-          deadline: { id: 'deadline', type: 'date', value: new Date(new Date(coupleData.weddingDateTime).getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
+          deadline: { id: 'deadline', type: 'date', value: (() => {
+            const weddingDate = getValidWeddingDate(coupleData.wedding_date);
+            const deadlineDate = new Date(weddingDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return deadlineDate.toISOString().split('T')[0];
+          })() },
           message: { id: 'message', type: 'textarea', value: 'Por favor, confirme sua presença até 30 dias antes do casamento.' },
           confirmationMessage: { id: 'confirmationMessage', type: 'textarea', value: 'Obrigado por confirmar! Aguardamos você.' },
           fields: []
@@ -351,17 +388,17 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
       },
       {
         id: 'venue',
-        name: 'Local',
         type: 'venue',
+        name: 'Local',
         component: 'VenueSection',
         editable: true,
         required: false,
-        order: 7,
+        order: 8,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -371,41 +408,36 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: 'Onde Será' },
-          ceremonyTitle: { id: 'ceremonyTitle', type: 'text', value: 'Cerimônia' },
-          ceremonyAddress: { 
-            id: 'ceremonyAddress', 
-            type: 'text', 
-            value: coupleData.ceremonyVenue || 'Local da cerimônia será divulgado em breve' 
-          },
-          ceremonyTime: { id: 'ceremonyTime', type: 'time', value: new Date(coupleData.weddingDateTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) },
-          ceremonyImage: { id: 'ceremonyImage', type: 'image', value: '/api/placeholder/600/400' },
+          ceremonyTitle: { id: 'ceremonyTitle', type: 'text', value: 'Cerimônia Religiosa' },
+          ceremonyAddress: { id: 'ceremonyAddress', type: 'text', value: coupleData.wedding_address || 'Igreja São José, Rua das Flores, 123' },
+          ceremonyTime: { id: 'ceremonyTime', type: 'text', value: coupleData.wedding_time || '16:00' },
+          ceremonyDescription: { id: 'ceremonyDescription', type: 'text', value: 'Local da cerimônia religiosa' },
+          ceremonyImage: { id: 'ceremonyImage', type: 'image', value: '/image/template_layout-2.jpg' },
           receptionTitle: { id: 'receptionTitle', type: 'text', value: 'Recepção' },
-          receptionAddress: { 
-            id: 'receptionAddress', 
-            type: 'text', 
-            value: coupleData.receptionVenue || 'Local da recepção será divulgado em breve' 
-          },
-          receptionTime: { id: 'receptionTime', type: 'time', value: new Date(new Date(coupleData.weddingDateTime).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) },
-          receptionImage: { id: 'receptionImage', type: 'image', value: '/api/placeholder/600/400' }
+          receptionAddress: { id: 'receptionAddress', type: 'text', value: 'Salão de Festas Villa Bella, Av. Principal, 456' },
+          receptionTime: { id: 'receptionTime', type: 'text', value: '18:30' },
+          receptionDescription: { id: 'receptionDescription', type: 'text', value: 'Local da festa e confraternização' },
+          receptionImage: { id: 'receptionImage', type: 'image', value: '/image/template_layout-3.jpg' }
         },
         settings: {
           showTitle: true,
-          animation: 'slide'
+          showSubtitle: true,
+          animation: 'fade'
         }
       },
       {
         id: 'details',
-        name: 'Detalhes',
         type: 'details',
+        name: 'Detalhes',
         component: 'DetailsSection',
         editable: true,
         required: false,
-        order: 8,
+        order: 9,
         enabled: true,
         layout: {
           type: 'container',
           background: 'colored',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -414,31 +446,47 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Informações Importantes' },
-          dressCode: { id: 'dressCode', type: 'text', value: 'Traje Esporte Fino' },
-          dressCodeDescription: { id: 'dressCodeDescription', type: 'textarea', value: 'Traje social, evitem cores muito claras como branco e bege.' },
-          importantNotes: { id: 'importantNotes', type: 'textarea', value: 'Cerimônia unplugged - pedimos para guardar os celulares durante a cerimônia.' },
-          timeline: [],
-          contacts: []
+          title: { id: 'title', type: 'text', value: 'Detalhes Importantes' },
+          details: [
+            {
+              id: 'detail_1',
+              title: 'Dress Code',
+              description: 'Traje social completo',
+              icon: 'dress'
+            },
+            {
+              id: 'detail_2',
+              title: 'Horário',
+              description: getTimeInputValue(coupleData.wedding_date, coupleData.wedding_time),
+              icon: 'clock'
+            },
+            {
+              id: 'detail_3',
+              title: 'Local',
+              description: locationText,
+              icon: 'location'
+            }
+          ]
         },
         settings: {
           showTitle: true,
+          showSubtitle: true,
           animation: 'fade'
         }
       },
       {
         id: 'gallery',
-        name: 'Galeria',
         type: 'gallery',
+        name: 'Galeria',
         component: 'GallerySection',
         editable: true,
         required: false,
-        order: 9,
+        order: 10,
         enabled: true,
         layout: {
           type: 'container',
           background: 'transparent',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -448,29 +496,34 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: 'Nossos Momentos' },
-          subtitle: { id: 'subtitle', type: 'text', value: 'Momentos especiais da nossa jornada' },
-          images: [],
-          layout: 'grid'
+          images: [
+            {
+              id: 'image_1',
+              url: coupleData.cover_photo_url || '/image/template_layout.jpg',
+              alt: 'Foto do casal',
+              caption: 'Momento especial'
+            }
+          ]
         },
         settings: {
           showTitle: true,
           showSubtitle: true,
-          animation: 'zoom'
+          animation: 'fade'
         }
       },
       {
         id: 'testimonials',
-        name: 'Depoimentos',
         type: 'testimonials',
+        name: 'Depoimentos',
         component: 'TestimonialsSection',
         editable: true,
         required: false,
-        order: 10,
+        order: 11,
         enabled: true,
         layout: {
           type: 'container',
           background: 'colored',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
@@ -479,69 +532,59 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Palavras Carinhosas' },
-          subtitle: { id: 'subtitle', type: 'text', value: 'O que nossos queridos disseram sobre nós' },
-          message: { id: 'message', type: 'textarea', value: 'Deixe uma mensagem carinhosa para os noivos' },
-          testimonials: []
+          title: { id: 'title', type: 'text', value: 'Depoimentos' },
+          testimonials: [
+            {
+              id: 'testimonial_1',
+              name: 'Família e Amigos',
+              text: 'Vocês são um casal incrível!',
+              role: 'Pessoas queridas',
+              image: '/api/placeholder/100/100'
+            }
+          ]
         },
         settings: {
           showTitle: true,
           showSubtitle: true,
-          animation: 'slide'
+          animation: 'fade'
         }
       },
       {
         id: 'footer',
-        name: 'Rodapé',
         type: 'footer',
+        name: 'Rodapé',
         component: 'FooterSection',
         editable: true,
         required: true,
-        order: 11,
+        order: 12,
         enabled: true,
         layout: {
           type: 'full',
           background: 'colored',
-          padding: 'large',
+          padding: 'xlarge',
           alignment: 'center',
           spacing: 'normal'
         },
         style: {
-          backgroundColor: '#f9fafb',
-          textColor: '#1f2937'
+          backgroundColor: '#1f2937',
+          textColor: '#ffffff'
         },
         data: {
-          thankYouMessage: { 
-            id: 'thankYouMessage', 
-            type: 'textarea', 
-            value: 'Obrigado por fazer parte do nosso dia especial! Vocês tornaram nosso sonho ainda mais bonito e inesquecível.' 
-          },
+          thankYouMessage: { id: 'thankYouMessage', type: 'textarea', value: 'Obrigado por fazer parte do nosso dia especial! Vocês tornaram nosso sonho ainda mais bonito e inesquecível.' },
           coupleSignature: { id: 'coupleSignature', type: 'text', value: `Com amor, ${coupleNames}` },
-          weddingDate: { id: 'weddingDate', type: 'date', value: coupleData.weddingDate },
-          weddingLocation: { id: 'weddingLocation', type: 'text', value: locationText },
-          socialLinks: {
-            instagram: { id: 'instagram', type: 'url', value: `@${coupleData.slug}` },
-            facebook: { id: 'facebook', type: 'url', value: `/${coupleData.slug}` },
-            youtube: { id: 'youtube', type: 'url', value: `@${coupleData.slug}` }
-          },
-          contactInfo: {
-            phone: { id: 'phone', type: 'phone', value: coupleData.bridePhone || coupleData.groomPhone || '(11) 99999-9999' },
-            email: { id: 'email', type: 'email', value: coupleData.email }
-          },
-          credits: {
-            photographer: { id: 'photographer', type: 'text', value: 'Fotografia: Studio Momentos' },
-            venue: { id: 'venue', type: 'text', value: coupleData.ceremonyVenue ? `Local: ${coupleData.ceremonyVenue}` : 'Local: A definir' },
-            website: { id: 'website', type: 'text', value: 'Site: EiVouCasar.com' }
-          }
+          weddingDate: { id: 'weddingDate', type: 'date', value: getDateInputValue(coupleData.wedding_date) },
+          contactEmail: { id: 'contactEmail', type: 'email', value: coupleData.email },
+          websiteCredit: { id: 'websiteCredit', type: 'text', value: `Site criado com amor por ${coupleNames} | ${new Date().getFullYear()}` }
         },
         settings: {
-          showTitle: false,
+          showTitle: true,
+          showSubtitle: true,
           animation: 'fade'
         }
       }
     ],
     globalSettings: {
-      showNavigation: true,
+      showNavigation: false,
       navigationStyle: 'sticky',
       showFooter: true,
       enableAnimations: true,
@@ -563,11 +606,11 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         type: 'textarea', 
         value: `Celebre conosco o casamento de ${coupleNames} no dia ${weddingDateFormatted} em ${locationText}` 
       },
-      image: { id: 'seoImage', type: 'image', value: coupleData.coverPhotoUrl || '/api/placeholder/1200/630' },
+      image: { id: 'seoImage', type: 'image', value: coupleData.cover_photo_url || '/api/placeholder/1200/630' },
       keywords: { 
         id: 'seoKeywords', 
         type: 'text', 
-        value: `casamento, ${coupleData.brideName.toLowerCase()}, ${coupleData.groomName.toLowerCase()}, ${coupleData.city.toLowerCase()}, ${new Date(coupleData.weddingDateTime).getFullYear()}` 
+        value: `casamento, ${coupleData.bride_name?.toLowerCase() || ''}, ${coupleData.groom_name?.toLowerCase() || ''}, ${coupleData.city?.toLowerCase() || ''}, ${getValidWeddingDate(coupleData.wedding_date).getFullYear()}` 
       }
     }
   };

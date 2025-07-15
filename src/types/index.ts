@@ -1,3 +1,5 @@
+import { ThemeColors } from './theme'
+
 export interface Couple {
   id: string
   user_id: string
@@ -11,12 +13,14 @@ export interface Couple {
   couple_story?: string
   bride_photo?: string
   groom_photo?: string
-  cover_photo?: string
+  cover_photo_url?: string
   slug: string
-  is_active: boolean
-  theme_color?: string
-  created_at: string
-  updated_at: string
+  custom_domain?: string
+  theme_colors?: ThemeColors
+  is_active?: boolean
+  is_published?: boolean
+  created_at?: string
+  updated_at?: string
   subscription_plan_id?: string | null
 }
 

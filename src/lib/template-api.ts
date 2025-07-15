@@ -191,7 +191,7 @@ export function createDefaultTemplate(coupleId: string): WeddingTemplate {
     name: 'Novo Template',
     description: 'Template personalizado para casamento',
     category: 'Custom',
-    preview: '/api/placeholder/800/600',
+    preview: '/image/template_layout.jpg',
     colors: {
       primary: '#be185d',
       secondary: '#ec4899',
@@ -224,7 +224,7 @@ export function createDefaultTemplate(coupleId: string): WeddingTemplate {
     seo: {
       title: { id: 'seoTitle', type: 'text', value: 'Nosso Casamento' },
       description: { id: 'seoDescription', type: 'textarea', value: 'Celebre conosco este momento especial' },
-      image: { id: 'seoImage', type: 'image', value: '/api/placeholder/1200/630' },
+      image: { id: 'seoImage', type: 'image', value: '/image/template_layout.jpg' },
       keywords: { id: 'seoKeywords', type: 'text', value: 'casamento, wedding' }
     }
   };

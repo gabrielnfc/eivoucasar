@@ -48,10 +48,12 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
           couple_story,
           bride_photo,
           groom_photo,
-          cover_photo,
+          cover_photo_url,
+          hero_background_image,
+          couple_photo,
+          theme_colors,
           is_active,
-          theme_color,
-          user_id,
+          is_published,
           created_at,
           updated_at
         `)

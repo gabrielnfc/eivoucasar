@@ -160,10 +160,49 @@ export function TemplateRenderer({
   // Ordenar seções por ordem configurada
   const sortedSections = template ? [...template.sections].sort((a, b) => a.order - b.order) : [];
 
+  // Mapear campos de seção para campos do formulário
+  const mapSectionFieldToFormField = (sectionId: string, fieldId: string): string | null => {
+    const mappings: Record<string, Record<string, string>> = {
+      'hero': {
+        'brideName': 'bride_name',
+        'groomName': 'groom_name',
+        'weddingDate': 'wedding_date',
+        'location': 'wedding_location'
+      },
+      'invitation': {
+        'message': 'invitation_message',
+        'title': 'invitation_message'
+      },
+      'story': {
+        'story': 'couple_story',
+        'content': 'couple_story'
+      },
+      'venue': {
+        'ceremonyVenue': 'wedding_location',
+        'receptionVenue': 'wedding_address',
+        'address': 'wedding_address'
+      },
+      'details': {
+        'ceremonyTime': 'wedding_time',
+        'time': 'wedding_time'
+      }
+    };
+
+    return mappings[sectionId]?.[fieldId] || null;
+  };
+
   // Handler para atualização de campos
   const handleFieldUpdate = (sectionId: string) => (fieldId: string, value: string) => {
     if (onSectionUpdate) {
       onSectionUpdate(sectionId, fieldId, value);
+    }
+    
+    // Notificar mudanças para o formulário de configurações
+    const mappedFieldId = mapSectionFieldToFormField(sectionId, fieldId);
+    if (mappedFieldId) {
+      window.dispatchEvent(new CustomEvent('templateFieldUpdate', {
+        detail: { fieldId: mappedFieldId, value }
+      }));
     }
     
     // Se não estiver no modo edição, podemos salvar diretamente na API
@@ -181,6 +220,9 @@ export function TemplateRenderer({
     } else if (coupleData) {
       // Se dados do casal foram fornecidos, usar diretamente
       console.log('🎯 TemplateRenderer: Usando dados do casal fornecidos:', coupleData.bride_name, '&', coupleData.groom_name);
+      console.log('🖼️ TemplateRenderer: hero_background_image:', coupleData.hero_background_image);
+      console.log('🖼️ TemplateRenderer: cover_photo_url:', coupleData.cover_photo_url);
+      console.log('🎨 TemplateRenderer: theme_color:', coupleData.theme_color);
       
       // Transformar dados para formato consistente
       const transformedData = {
@@ -204,7 +246,21 @@ export function TemplateRenderer({
         bridePhone: coupleData.bride_phone,
         groomPhone: coupleData.groom_phone,
         isActive: coupleData.is_active,
-        isPublished: coupleData.is_published
+        isPublished: coupleData.is_published,
+        // Adicionar campos esperados pelo CoupleData
+        bride_name: coupleData.bride_name,
+        groom_name: coupleData.groom_name,
+        wedding_date: coupleData.wedding_date,
+        wedding_time: coupleData.wedding_time,
+        wedding_location: coupleData.wedding_location,
+        wedding_address: coupleData.wedding_address,
+        hero_background_image: coupleData.hero_background_image,
+        couple_photo: coupleData.couple_photo,
+        bride_photo: coupleData.bride_photo,
+        groom_photo: coupleData.groom_photo,
+        theme_color: coupleData.theme_color,
+        is_active: coupleData.is_active,
+        is_published: coupleData.is_published
       };
       
       const realTemplate = createRealTemplate(transformedData);

@@ -7,24 +7,25 @@ import { ArrowLeft, Sparkles, Edit3, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/auth-context'
 import { ThemeProvider } from '@/contexts/theme-context'
-import SettingsForm from '@/components/dashboard/settings-form'
+import UnifiedSettings from '@/components/dashboard/unified-settings'
 import { TemplateRenderer } from '@/components/templates/template-renderer'
+import { SectionNavigator } from '@/components/dashboard/section-navigator'
 import ThemeSelector from '@/components/ui/theme-selector'
 import { createClient } from '@/lib/supabase/client'
+import { createRealTemplate } from '@/lib/create-real-template'
 import type { Couple } from '@/types'
 import type { WeddingTemplate } from '@/types/template'
-
 
 export default function SettingsPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
   const [couple, setCouple] = useState<Couple | null>(null)
+  const [template, setTemplate] = useState<WeddingTemplate | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'editor' | 'settings'>('editor')
   const [isPublishing, setIsPublishing] = useState(false)
   const [publishMessage, setPublishMessage] = useState<string>('')
-
 
   console.log('Settings page - User:', user, 'Loading:', loading)
 
@@ -41,6 +42,14 @@ export default function SettingsPage() {
     }
   }, [user, loading, router])
 
+  // Gera o template sempre que o couple data mudar
+  useEffect(() => {
+    if (couple) {
+      const generatedTemplate = createRealTemplate(couple as any)
+      setTemplate(generatedTemplate)
+    }
+  }, [couple])
+
   const fetchCouple = async () => {
     if (!user?.id) return
 
@@ -49,36 +58,46 @@ export default function SettingsPage() {
       setError(null)
       
       const supabase = createClient()
-      console.log('Fetching couple data for user:', user.id)
       
-      const { data, error: coupleError } = await supabase
+      console.log('Fetching couple for user:', user.id)
+      const { data: coupleData, error: coupleError } = await supabase
         .from('couples')
         .select('*')
         .eq('user_id', user.id)
         .single()
 
+      console.log('Couple data:', coupleData, 'Error:', coupleError)
+
       if (coupleError) {
-        console.error('Erro ao buscar casal:', coupleError)
-        setError('Erro ao carregar dados do casal')
-        return
+        if (coupleError.code === 'PGRST116') {
+          console.log('No couple found, redirecting to dashboard')
+          router.push('/dashboard')
+          return
+        }
+        throw coupleError
       }
 
-      console.log('Couple data loaded:', data)
-      console.log('Couple slug que será usado:', data?.slug)
-      setCouple(data as any)
-    } catch (error) {
-      console.error('Erro ao buscar casal:', error)
+      setCouple(coupleData as unknown as Couple)
+    } catch (err) {
+      console.error('Error fetching couple:', err)
       setError('Erro ao carregar dados do casal')
     } finally {
       setIsLoading(false)
     }
   }
 
-
-
-  const handleSectionUpdate = (sectionId: string, fieldId: string, value: string) => {
-    console.log('Section updated:', sectionId, fieldId, value)
-    // Implementar lógica para atualizar a seção no template
+  const handleSectionUpdate = (data: any) => {
+    console.log('Settings update:', data)
+    console.log('🖼️ Settings update - hero_background_image:', data.hero_background_image)
+    
+    // Atualizar o couple state com novos dados
+    setCouple(prev => prev ? { ...prev, ...data } : null)
+    
+    // Regenerar template com novos dados
+    if (couple) {
+      const updatedTemplate = createRealTemplate({ ...couple, ...data })
+      setTemplate(updatedTemplate)
+    }
   }
 
   const handlePublishSite = async () => {
@@ -87,115 +106,59 @@ export default function SettingsPage() {
     try {
       setIsPublishing(true)
       setPublishMessage('')
-
-      const response = await fetch(`/api/couples/${couple.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          isPublished: true
+      
+      const supabase = createClient()
+      
+      const { error } = await supabase
+        .from('couples')
+        .update({ 
+          is_published: true,
+          updated_at: new Date().toISOString()
         })
-      })
+        .eq('id', couple.id)
 
-      const result = await response.json()
-
-      if (result.success) {
-        setPublishMessage('✅ Site publicado com sucesso!')
-        // Atualizar dados locais
-        setCouple(prev => prev ? { ...prev, is_published: true } as any : null)
-      } else {
-        setPublishMessage('❌ Erro ao publicar: ' + result.error)
+      if (error) {
+        throw error
       }
-    } catch (error) {
-      setPublishMessage('❌ Erro ao publicar o site')
-      console.error('Error publishing site:', error)
+
+      setCouple(prev => prev ? { ...prev, is_published: true } as any : null)
+      setPublishMessage('✅ Site publicado com sucesso!')
+      
+      setTimeout(() => {
+        setPublishMessage('')
+      }, 3000)
+      
+    } catch (err) {
+      console.error('Error publishing site:', err)
+      setPublishMessage('❌ Erro ao publicar o site. Tente novamente.')
+      setTimeout(() => {
+        setPublishMessage('')
+      }, 5000)
     } finally {
       setIsPublishing(false)
-      
-      // Limpar mensagem após 3 segundos
-      setTimeout(() => setPublishMessage(''), 3000)
     }
   }
 
+  // Loading state
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50/50 to-blue-50/30"></div>
-
-
-        <div className="relative z-10 min-h-screen flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <div className="w-20 h-20 mx-auto mb-6 relative">
-              <motion.div
-                className="w-full h-full border-4 border-purple-300 border-t-purple-600 rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              />
-              <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-purple-600" />
-            </div>
-            <p className="text-gray-600 font-medium">
-              Carregando editor...
-            </p>
-          </motion.div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return (
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Não autenticado</h1>
-          <p className="text-gray-600 mb-6">Você precisa estar logado para acessar esta página.</p>
-          <a
-            href="/login"
-            className="bg-rose-500 hover:bg-rose-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            Fazer Login
-          </a>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando configurações...</p>
         </div>
       </div>
     )
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Erro</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="space-x-4">
-            <button
-              onClick={() => fetchCouple()}
-              className="bg-rose-500 hover:bg-rose-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Tentar Novamente
-            </button>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Voltar ao Dashboard
-            </button>
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!couple) {
-    return (
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Dados não encontrados</h1>
-          <p className="text-gray-600 mb-6">Não foi possível encontrar os dados do casal.</p>
           <button
             onClick={() => router.push('/dashboard')}
             className="bg-rose-500 hover:bg-rose-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
@@ -207,84 +170,68 @@ export default function SettingsPage() {
     )
   }
 
+  // Prepara seções para navegação
+  const sections = template?.sections?.map(section => ({
+    id: section.id,
+    name: section.name,
+    type: section.type,
+    enabled: section.enabled
+  })) || []
+
   return (
-    <ThemeProvider coupleId={couple?.id}>
+            <ThemeProvider coupleId={couple?.id}>
       <div className="min-h-screen bg-gray-50">
-        {/* Toolbar Fixo */}
+        {/* Header Principal - Mais Limpo */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm"
         >
-          <div className="flex h-16 items-center justify-between px-4">
-            {/* Left side - Back button and title */}
-            <div className="flex items-center space-x-4">
+          <div className="flex h-14 items-center justify-between px-6">
+            {/* Left side - Navigation */}
+            <div className="flex items-center space-x-6">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/dashboard')}
-                className="hover:bg-gray-100"
+                className="hover:bg-gray-100 text-gray-600"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Dashboard
               </Button>
               
-              <div className="h-6 w-px bg-gray-300"></div>
+              <div className="h-5 w-px bg-gray-300"></div>
               
-              <div className="flex items-center space-x-2">
-                <Edit3 className="h-5 w-5 text-purple-600" />
-                <span className="font-semibold text-gray-800">Editor do Site</span>
-                {couple && (
-                  <span className="text-sm text-gray-500">
-                    - {couple.bride_name} & {couple.groom_name}
-                  </span>
-                )}
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-purple-50">
+                  <Edit3 className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-800">Editor do Site</span>
+                  {couple && (
+                    <span className="text-sm text-gray-500 ml-2">
+                      {couple.bride_name} & {couple.groom_name}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-
-            {/* Center - Tab Navigation */}
-            <div className="flex items-center gap-3">
-              <div className="bg-gray-100 rounded-lg p-1 flex">
-                <button
-                  onClick={() => setActiveTab('editor')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'editor'
-                      ? 'bg-white text-purple-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <Edit3 className="w-4 h-4 mr-2 inline" />
-                  Editor Visual
-                </button>
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'settings'
-                      ? 'bg-white text-purple-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <Settings className="w-4 h-4 mr-2 inline" />
-                  Configurações
-                </button>
-              </div>
-              
-              {/* Theme Selector */}
-              <ThemeSelector />
             </div>
 
             {/* Right side - Actions */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               {/* Site status */}
               {couple && (
-                <div className="flex items-center space-x-2 text-sm">
+                <div className="flex items-center space-x-2 text-sm bg-gray-50 px-3 py-1.5 rounded-full">
                   <div className={`w-2 h-2 rounded-full ${(couple as any).is_published ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 font-medium">
                     {(couple as any).is_published ? 'Publicado' : 'Rascunho'}
                   </span>
                 </div>
               )}
+
+              {/* Theme Selector */}
+              <ThemeSelector />
 
               {/* Publish button */}
               <Button
@@ -301,33 +248,83 @@ export default function SettingsPage() {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Publicar Site
+                    Publicar
                   </>
                 )}
               </Button>
 
-              {/* View site & copy link */}
+              {/* View site button */}
               {(couple as any)?.is_published && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(`/${couple.slug}`, '_blank')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => couple && window.open(`/${couple.slug}`, '_blank')}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                >
+                  Ver Site
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Sub-header com Tabs e Navegação de Seções */}
+          <div className="border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-purple-50/30">
+            <div className="flex h-12 items-center justify-between px-4 md:px-6">
+              {/* Tab Navigation */}
+              <div className="flex items-center">
+                <div className="bg-white rounded-lg p-1 flex border border-gray-200 shadow-sm">
+                  <button
+                    onClick={() => setActiveTab('editor')}
+                    className={`px-3 md:px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'editor'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                    }`}
                   >
-                    Ver Site
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/${couple.slug}`)
-                      setPublishMessage('✅ Link copiado para a área de transferência!')
-                      setTimeout(() => setPublishMessage(''), 2000)
-                    }}
+                    <Edit3 className="w-4 h-4 mr-1 md:mr-2 inline" />
+                    <span className="hidden sm:inline">Editor</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className={`px-3 md:px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'settings'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                    }`}
                   >
-                    Copiar Link
-                  </Button>
+                    <Settings className="w-4 h-4 mr-1 md:mr-2 inline" />
+                    <span className="hidden sm:inline">Config</span>
+                  </button>
                 </div>
+              </div>
+
+              {/* Section Navigator - Apenas no Editor */}
+              {activeTab === 'editor' && sections.length > 0 && (
+                <div className="flex-1 flex justify-center px-4 md:px-6">
+                  <SectionNavigator
+                    sections={sections}
+                    onSectionClick={(sectionId) => {
+                      console.log('Section clicked:', sectionId)
+                    }}
+                    className="max-w-6xl w-full"
+                  />
+                </div>
+              )}
+
+              {/* Copy Link Button */}
+              {(couple as any)?.is_published && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    couple && navigator.clipboard.writeText(`${window.location.origin}/${couple.slug}`)
+                    setPublishMessage('✅ Link copiado!')
+                    setTimeout(() => setPublishMessage(''), 2000)
+                  }}
+                  className="text-gray-500 hover:text-gray-700 hover:bg-white/50 hidden md:flex"
+                >
+                  Copiar Link
+                </Button>
               )}
             </div>
           </div>
@@ -338,7 +335,7 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className={`border-b px-4 py-2 ${
+              className={`border-b px-6 py-2 ${
                 publishMessage.includes('✅') 
                   ? 'bg-green-50 border-green-200 text-green-800' 
                   : 'bg-red-50 border-red-200 text-red-800'
@@ -349,13 +346,11 @@ export default function SettingsPage() {
           )}
         </motion.header>
 
-
-
-        {/* Main Content - Full Screen */}
-        <main className="pt-16 min-h-screen">
+        {/* Main Content - Ajustado para novo header */}
+        <main className="pt-20 min-h-screen">
           {/* Content Area */}
           {activeTab === 'editor' && couple && (
-            <div className="h-[calc(100vh-4rem)]">
+            <div className="h-[calc(100vh-5rem)]">
               <TemplateRenderer
                 coupleData={couple}
                 isEditable={true}
@@ -365,7 +360,7 @@ export default function SettingsPage() {
           )}
 
           {activeTab === 'editor' && !couple && (
-            <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
+            <div className="h-[calc(100vh-5rem)] flex items-center justify-center bg-white">
               <div className="text-center">
                 <Edit3 className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -378,11 +373,12 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === 'settings' && (
-            <div className="h-[calc(100vh-4rem)] overflow-y-auto bg-white">
-              <div className="max-w-4xl mx-auto p-6">
-                <SettingsForm initialCouple={couple} />
-              </div>
+          {activeTab === 'settings' && couple && (
+            <div className="h-[calc(100vh-5rem)] bg-white">
+                              <UnifiedSettings 
+                  initialCouple={couple} 
+                  onDataChange={handleSectionUpdate}
+                />
             </div>
           )}
         </main>

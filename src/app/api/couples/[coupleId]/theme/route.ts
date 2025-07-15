@@ -4,20 +4,37 @@ import { DEFAULT_THEMES } from '@/types/theme'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { coupleId: string } }
+  { params }: { params: Promise<{ coupleId: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const { coupleId } = params
+    const { coupleId } = await params
 
     // Buscar o tema atual do casal
-    const { data: couple, error } = await supabase
+    // Primeiro tentar por id (couple_id), depois por user_id (para compatibilidade)
+    let { data: couple, error } = await supabase
       .from('couples')
       .select('id, theme_colors')
       .eq('id', coupleId)
       .single()
+    
+    // Se não encontrar por id, tentar por user_id
+    if (error && error.code === 'PGRST116') {
+      console.log(`Tentando buscar por user_id: ${coupleId}`)
+      const { data: coupleByUserId, error: userError } = await supabase
+        .from('couples')
+        .select('id, theme_colors')
+        .eq('user_id', coupleId)
+        .single()
+      
+      if (coupleByUserId) {
+        console.log(`Encontrado por user_id: ${coupleByUserId.id}`)
+        couple = coupleByUserId
+        error = userError
+      }
+    }
 
-    if (error) {
+    if (error || !couple) {
       console.error('Erro ao buscar casal:', error)
       return NextResponse.json({ error: 'Casal não encontrado' }, { status: 404 })
     }
@@ -41,11 +58,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { coupleId: string } }
+  { params }: { params: Promise<{ coupleId: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const { coupleId } = params
+    const { coupleId } = await params
     const { themeId } = await request.json()
 
     // Validar se o tema existe
@@ -55,13 +72,29 @@ export async function PUT(
     }
 
     // Buscar theme_colors atual para preservar outros dados
-    const { data: couple, error: fetchError } = await supabase
+    let { data: couple, error: fetchError } = await supabase
       .from('couples')
-      .select('theme_colors')
+      .select('id, theme_colors')
       .eq('id', coupleId)
       .single()
 
-    if (fetchError) {
+    // Se não encontrar por id, tentar por user_id
+    if (fetchError && fetchError.code === 'PGRST116') {
+      console.log(`PUT: Tentando buscar por user_id: ${coupleId}`)
+      const { data: coupleByUserId, error: userError } = await supabase
+        .from('couples')
+        .select('id, theme_colors')
+        .eq('user_id', coupleId)
+        .single()
+      
+      if (coupleByUserId) {
+        console.log(`PUT: Encontrado por user_id: ${coupleByUserId.id}`)
+        couple = coupleByUserId
+        fetchError = userError
+      }
+    }
+
+    if (fetchError || !couple) {
       console.error('Erro ao buscar casal:', fetchError)
       return NextResponse.json({ error: 'Casal não encontrado' }, { status: 404 })
     }
@@ -87,11 +120,11 @@ export async function PUT(
       }
     }
 
-    // Atualizar no banco
+    // Atualizar no banco usando o ID real do casal
     const { error: updateError } = await supabase
       .from('couples')
       .update({ theme_colors: updatedThemeColors })
-      .eq('id', coupleId)
+      .eq('id', couple.id)
 
     if (updateError) {
       console.error('Erro ao atualizar tema:', updateError)

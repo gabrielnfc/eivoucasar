@@ -102,7 +102,7 @@ export function GallerySection({
   const mockImages: GalleryImage[] = [
     {
       id: '1',
-      url: '/api/placeholder/600/400',
+      url: '/image/casais/casal1 - 1.jpg',
       caption: 'Nosso primeiro encontro',
       alt: 'Casal no primeiro encontro',
       category: 'namoro',
@@ -113,7 +113,7 @@ export function GallerySection({
     },
     {
       id: '2',
-      url: '/api/placeholder/400/600',
+      url: '/image/casais/casal1 - 2.jpg',
       caption: 'Pedido de casamento',
       alt: 'Momento do pedido',
       category: 'pedido',
@@ -124,7 +124,7 @@ export function GallerySection({
     },
     {
       id: '3',
-      url: '/api/placeholder/600/400',
+      url: '/image/casais/casal1 - 3.jpg',
       caption: 'Ensaio pré-wedding',
       alt: 'Ensaio fotográfico',
       category: 'ensaio',
@@ -135,7 +135,7 @@ export function GallerySection({
     },
     {
       id: '4',
-      url: '/api/placeholder/500/600',
+      url: '/image/casais/casal1 - 4.jpg',
       caption: 'Viagem romântica',
       alt: 'Viagem para Paris',
       category: 'viagem',
@@ -146,7 +146,7 @@ export function GallerySection({
     },
     {
       id: '5',
-      url: '/api/placeholder/600/500',
+      url: '/image/casais/casal1 - 5.jpg',
       caption: 'Família reunida',
       alt: 'Encontro em família',
       category: 'familia',
@@ -157,7 +157,7 @@ export function GallerySection({
     },
     {
       id: '6',
-      url: '/api/placeholder/400/500',
+      url: '/image/casais/casal2-1.jpg',
       caption: 'Momentos especiais',
       alt: 'Momento romântico',
       category: 'namoro',

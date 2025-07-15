@@ -211,10 +211,10 @@ export default function DebugCouplesPage() {
           📋 Informações Úteis
         </h3>
         <ul className="text-sm text-blue-700 space-y-2">
-                      <li>• <strong>API de Debug:</strong> <code>/api/couples/debug</code></li>
+          <li>• <strong>API de Debug:</strong> <code>/api/couples/debug</code></li>
             <li>• <strong>API Pública por Slug:</strong> <code>/api/public/couples/[slug]</code></li>
             <li>• <strong>API Privada por ID:</strong> <code>/api/couples/[coupleId]</code></li>
-            <li>• <strong>Criar Teste:</strong> <code>/api/couples/create-test</code></li>
+          <li>• <strong>Criar Teste:</strong> <code>/api/couples/create-test</code></li>
           <li>• <strong>Testar Supabase:</strong> <code>/api/test-supabase</code></li>
           <li>• <strong>Editor:</strong> <code>/dashboard/settings</code></li>
           <li>• <strong>Site do Casal:</strong> <code>/[slug]</code></li>
