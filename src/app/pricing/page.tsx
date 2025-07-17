@@ -16,7 +16,7 @@ export default function PricingPage() {
 	return (
 		<div className="min-h-screen bg-white dark:bg-gray-900">
 			{/* Navigation */}
-			<Navbar currentPage="pricing" variant="transparent" />
+			<Navbar />
 
 			{/* Hero Section */}
 			<div className="bg-gradient-to-b from-rose-50 to-white dark:from-gray-900 dark:to-gray-800 py-20">

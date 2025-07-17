@@ -51,13 +51,35 @@ export const DB_TO_FORM_MAPPING = {
   slug: 'slug'
 } as const
 
+// Campos que são datas e precisam ser convertidos para null se vazios
+const DATE_FIELDS = ['wedding_date', 'first_meeting_date', 'engagement_date']
+
+// Campos de texto que podem ser null se vazios
+const NULLABLE_TEXT_FIELDS = [
+  'formal_invitation_message', 'first_meeting_story', 'engagement_story',
+  'bride_photo', 'groom_photo', 'cover_photo_url', 'couple_photo'
+]
+
 // Converter dados do formulário para o banco
 export function formToDbData(formData: any): any {
   const dbData: any = {}
   
   for (const [formField, dbField] of Object.entries(FORM_TO_DB_MAPPING)) {
     if (formData[formField] !== undefined) {
-      dbData[dbField] = formData[formField]
+      let value = formData[formField]
+      
+      // Converter strings vazias para null em campos de data
+      if (DATE_FIELDS.includes(dbField) && (value === '' || value === null || value === undefined)) {
+        value = null
+      }
+      
+      // Converter strings vazias para null em campos de texto opcionais
+      if (NULLABLE_TEXT_FIELDS.includes(dbField) && (value === '' || value === null || value === undefined)) {
+        value = null
+      }
+      
+      // Para outros campos de texto, manter string vazia se necessário
+      dbData[dbField] = value
     }
   }
   

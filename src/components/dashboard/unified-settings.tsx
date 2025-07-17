@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Heart, Calendar, MapPin, Clock, User, FileText, Image, Palette, Link, Save, Shield,
@@ -12,6 +12,7 @@ import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import type { Couple } from '@/types'
 import { createClient } from '@/lib/supabase/client'
+import { coupleService } from '@/lib/database/couple-service'
 import { dbToFormData } from '@/lib/utils/field-mapping'
 import { ImageUpload } from '@/components/upload/image-upload'
 import { generateSlug } from '@/lib/utils/slug'
@@ -290,9 +291,10 @@ const FIELD_CONFIG = {
 interface UnifiedSettingsProps {
   initialCouple: Couple
   onDataChange?: (data: any) => void
+  onCoupleUpdate?: (updatedCouple: Couple) => void // Para sincronização com hook
 }
 
-export default function UnifiedSettings({ initialCouple, onDataChange }: UnifiedSettingsProps) {
+const UnifiedSettings = memo(function UnifiedSettings({ initialCouple, onDataChange, onCoupleUpdate }: UnifiedSettingsProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [activeSection, setActiveSection] = useState('basic-info')
@@ -341,7 +343,7 @@ export default function UnifiedSettings({ initialCouple, onDataChange }: Unified
 
     const saveTimer = setTimeout(() => {
       handleAutoSave()
-    }, 3000)
+    }, 5000) // Aumentado para 5s para reduzir chamadas
 
     return () => clearTimeout(saveTimer)
   }, [formData, hasUnsavedChanges])
@@ -416,83 +418,32 @@ export default function UnifiedSettings({ initialCouple, onDataChange }: Unified
       console.log('Pulando auto-save: dados básicos incompletos')
       return
     }
-    
-    const validation = unifiedSettingsSchema.safeParse(formData)
-    
-    if (!validation.success) {
-      const firstError = validation.error.errors[0]
-      throw new Error(firstError.message)
+
+    if (!initialCouple?.user_id) {
+      console.error('❌ User ID não encontrado')
+      throw new Error('Usuário não identificado')
     }
 
-    const supabase = createClient()
-    
-    // Try to get current session first
-    let { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
-    // If no session, try to refresh
-    if (!session && !sessionError) {
-      console.log('No session found, attempting to refresh...')
-      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-      
-      if (refreshError) {
-        console.log('Refresh failed, redirecting to login')
-        window.location.href = '/login'
-        return
+    try {
+      const result = await coupleService.updateCouple(initialCouple.user_id, formData)
+
+      if (!result.success) {
+        throw new Error(result.error)
       }
       
-      session = refreshData.session
-    }
-    
-    if (sessionError || !session?.access_token) {
-      console.log('Session error:', sessionError)
-      throw new Error('Sessão expirada. Por favor, faça login novamente.')
-    }
-
-    const response = await fetch('/api/couples', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify(formData),
-    })
-
-    if (!response.ok) {
-      const result = await response.json()
+      // Atualizar estado local com dados atualizados
+      onDataChange?.(result.data)
       
-      // Se token expirou, tentar refresh
-      if (response.status === 401) {
-        console.log('Token expired, attempting refresh...')
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-        
-        if (refreshError) {
-          console.log('Refresh failed, redirecting to login')
-          window.location.href = '/login'
-          return
-        }
-        
-        // Tentar novamente com novo token
-        const retryResponse = await fetch('/api/couples', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${refreshData.session?.access_token}`,
-          },
-          body: JSON.stringify(formData),
-        })
-        
-        if (!retryResponse.ok) {
-          const retryResult = await retryResponse.json()
-          throw new Error(retryResult.error || 'Erro ao salvar')
-        }
-        
-        return retryResponse.json()
+      // Sincronizar com hook otimizado
+      if (onCoupleUpdate && result.data) {
+        onCoupleUpdate(result.data as unknown as Couple)
       }
       
-      throw new Error(result.error || 'Erro ao salvar')
+      return result
+    } catch (error) {
+      console.error('❌ Error in saveData:', error)
+      throw error
     }
-
-    return response.json()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -715,4 +666,6 @@ export default function UnifiedSettings({ initialCouple, onDataChange }: Unified
       </div>
     </div>
   )
-} 
+})
+
+export default UnifiedSettings 

@@ -1,87 +1,81 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { WeddingTheme, ThemeContextType, DEFAULT_THEMES } from '@/types/theme'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { WeddingTheme, DEFAULT_THEMES } from '@/types/theme'
+import { useTheme as useThemeHook } from '@/hooks/use-theme'
+import type { Couple } from '@/types'
+
+interface ThemeContextType {
+  currentTheme: WeddingTheme
+  availableThemes: WeddingTheme[]
+  setTheme: (themeId: string) => Promise<void>
+  isLoading: boolean
+}
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 interface ThemeProviderProps {
-  children: ReactNode
+  children: React.ReactNode
   coupleId?: string
+  userId?: string
+  coupleData?: Couple | null  // Dados já carregados
 }
 
-export function ThemeProvider({ children, coupleId }: ThemeProviderProps) {
+export function ThemeProvider({ children, coupleId, userId, coupleData }: ThemeProviderProps) {
   const [currentTheme, setCurrentTheme] = useState<WeddingTheme>(DEFAULT_THEMES[0])
   const [availableThemes] = useState<WeddingTheme[]>(DEFAULT_THEMES)
-  const [isLoading, setIsLoading] = useState(true)
+  
+  // Usar userId se disponível, senão fallback para coupleId (modo compatibilidade)
+  const effectiveUserId = userId || coupleId
+  
+  console.log('🎨 ThemeProvider:', { 
+    userId, 
+    coupleId, 
+    effectiveUserId, 
+    hasCoupleData: !!coupleData 
+  })
+  
+  // Passar dados do casal para evitar chamada desnecessária
+  const { themeId, isLoading, updateTheme } = useThemeHook(effectiveUserId, { 
+    coupleData 
+  })
 
-  // Carregar tema salvo do localStorage ou database
+  // Atualizar tema atual quando themeId muda
   useEffect(() => {
-    const loadSavedTheme = async () => {
-      try {
-        setIsLoading(true)
-        
-        // Primeiro tenta localStorage para cache rápido
-        const savedThemeId = localStorage.getItem(`theme_${coupleId}`)
-        
-        if (savedThemeId) {
-          const savedTheme = DEFAULT_THEMES.find(theme => theme.id === savedThemeId)
-          if (savedTheme) {
-            setCurrentTheme(savedTheme)
-          }
-        }
-        
-        // Se houver coupleId, busca do database
+    if (themeId) {
+      const theme = DEFAULT_THEMES.find(t => t.id === themeId)
+      if (theme) {
+        setCurrentTheme(theme)
+        // Cache local
         if (coupleId) {
-          try {
-            const response = await fetch(`/api/couples/${coupleId}/theme`)
-            if (response.ok) {
-              const { themeId } = await response.json()
-              const dbTheme = DEFAULT_THEMES.find(theme => theme.id === themeId)
-              if (dbTheme) {
-                setCurrentTheme(dbTheme)
-                localStorage.setItem(`theme_${coupleId}`, themeId)
-              }
-            }
-          } catch (error) {
-            console.warn('Erro ao carregar tema do database:', error)
-          }
+          localStorage.setItem(`theme_${coupleId}`, themeId)
         }
-      } catch (error) {
-        console.error('Erro ao carregar tema:', error)
-      } finally {
-        setIsLoading(false)
       }
     }
+  }, [themeId, coupleId])
 
-    loadSavedTheme()
-  }, [coupleId])
-
-  const setTheme = async (themeId: string) => {
-    const newTheme = DEFAULT_THEMES.find(theme => theme.id === themeId)
+  const setTheme = async (newThemeId: string) => {
+    const newTheme = DEFAULT_THEMES.find(theme => theme.id === newThemeId)
     if (!newTheme) return
 
-    // Atualiza tema imediatamente para UX responsiva
-    setCurrentTheme(newTheme)
-    
-    // Salva no localStorage para cache
-    if (coupleId) {
-      localStorage.setItem(`theme_${coupleId}`, themeId)
-    }
-
-    // Salva no database em background
-    if (coupleId) {
-      try {
-        await fetch(`/api/couples/${coupleId}/theme`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ themeId }),
-        })
-      } catch (error) {
-        console.error('Erro ao salvar tema no database:', error)
+    try {
+      // Atualizar estado local imediatamente para UX responsiva
+      setCurrentTheme(newTheme)
+      
+      // Salvar no localStorage
+      if (coupleId) {
+        localStorage.setItem(`theme_${coupleId}`, newThemeId)
       }
+
+      // Salvar no servidor usando o hook
+      if (updateTheme) {
+        const result = await updateTheme(newThemeId)
+        if (!result.success) {
+          console.warn('Erro ao salvar tema no servidor:', result.error)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao alterar tema:', error)
     }
   }
 

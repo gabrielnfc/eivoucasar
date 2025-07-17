@@ -34,6 +34,7 @@ export interface SignUpData {
 export interface SignInData {
   email: string
   password: string
+  rememberMe?: boolean
 }
 
 export interface AuthUser {
@@ -112,9 +113,25 @@ export async function signUp(data: SignUpData) {
 export async function signIn(data: SignInData) {
   try {
     const supabase = createClient()
-    const { data: authData, error } = await supabase.auth.signInWithPassword(data)
+    
+    // Configure session duration based on rememberMe
+    const { email, password, rememberMe = false } = data
+    
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
     
     if (error) throw error
+
+    // If rememberMe is true, we could store additional local preferences
+    if (rememberMe) {
+      localStorage.setItem('rememberLogin', 'true')
+      localStorage.setItem('lastLoginEmail', email)
+    } else {
+      localStorage.removeItem('rememberLogin')
+      localStorage.removeItem('lastLoginEmail')
+    }
 
     return { success: true, data: authData }
   } catch (error: any) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
@@ -31,6 +31,7 @@ export default function LoginPage() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [rememberMe, setRememberMe] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
@@ -40,13 +41,28 @@ export default function LoginPage() {
 		threshold: 0.1,
 	});
 
+	// Load saved email if remember me was checked previously
+	useEffect(() => {
+		const rememberLogin = localStorage.getItem('rememberLogin')
+		const lastLoginEmail = localStorage.getItem('lastLoginEmail')
+		
+		if (rememberLogin === 'true' && lastLoginEmail) {
+			setEmail(lastLoginEmail)
+			setRememberMe(true)
+		}
+	}, [])
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		setError('');
 
 		try {
-			const result = await signIn({ email, password });
+			const result = await signIn({ 
+				email, 
+				password,
+				rememberMe: rememberMe, // Pass remember me option to signIn
+			});
 
 			if (result.success) {
 				await refreshUser();
@@ -230,6 +246,8 @@ export default function LoginPage() {
 											<input
 												type="checkbox"
 												className="w-4 h-4 rounded border-gray-300 text-rose-500 focus:ring-rose-500 focus:ring-offset-0 transition-colors duration-200"
+												checked={rememberMe}
+												onChange={(e) => setRememberMe(e.target.checked)}
 											/>
 											<span className="group-hover:text-gray-800 transition-colors duration-200">
 												Lembrar de mim

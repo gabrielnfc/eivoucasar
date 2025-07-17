@@ -5,93 +5,64 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Sparkles, Edit3, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/auth-context'
+import { useRequireAuth } from '@/contexts/auth-context'
 import { ThemeProvider } from '@/contexts/theme-context'
 import UnifiedSettings from '@/components/dashboard/unified-settings'
 import { TemplateRenderer } from '@/components/templates/template-renderer'
 import { SectionNavigator } from '@/components/dashboard/section-navigator'
 import ThemeSelector from '@/components/ui/theme-selector'
 import { createClient } from '@/lib/supabase/client'
+import { coupleService } from '@/lib/database/couple-service'
+import { useCouple } from '@/hooks/use-couple'
 import { createRealTemplate } from '@/lib/create-real-template'
 import type { Couple } from '@/types'
 import type { WeddingTemplate } from '@/types/template'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user, loading } = useAuth()
-  const [couple, setCouple] = useState<Couple | null>(null)
+  const { user, loading, initialized } = useRequireAuth()
+  
+  // 🌟 OTIMIZAÇÃO: useCouple sempre primeiro - fonte única de dados
+  const { couple, isLoading, error, updateLocalCouple } = useCouple(user?.id)
+  
   const [template, setTemplate] = useState<WeddingTemplate | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'editor' | 'settings'>('editor')
   const [isPublishing, setIsPublishing] = useState(false)
   const [publishMessage, setPublishMessage] = useState<string>('')
 
-  console.log('Settings page - User:', user, 'Loading:', loading)
+  // Log para debug do fluxo otimizado
+  console.log('🎯 Settings Page: Render state', {
+    userLoading: loading,
+    hasUser: !!user,
+    coupleLoading: isLoading,
+    hasCouple: !!couple,
+    coupleError: error
+  })
 
+  // Redirecionar se não encontrar casal
   useEffect(() => {
-    if (!loading && !user) {
-      console.log('Redirecting to login - no user')
-      router.push('/login')
-      return
+    if (initialized && !isLoading && error === 'Nenhum casal encontrado') {
+      router.push('/dashboard')
     }
+  }, [initialized, isLoading, error, router])
 
-    if (user) {
-      console.log('User found, fetching couple data')
-      fetchCouple()
-    }
-  }, [user, loading, router])
-
-  // Gera o template sempre que o couple data mudar
+  // Gerar template sempre que couple mudar
   useEffect(() => {
     if (couple) {
+      console.log('📄 Settings: Generating template from couple data')
       const generatedTemplate = createRealTemplate(couple as any)
       setTemplate(generatedTemplate)
     }
   }, [couple])
-
-  const fetchCouple = async () => {
-    if (!user?.id) return
-
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const supabase = createClient()
-      
-      console.log('Fetching couple for user:', user.id)
-      const { data: coupleData, error: coupleError } = await supabase
-        .from('couples')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      console.log('Couple data:', coupleData, 'Error:', coupleError)
-
-      if (coupleError) {
-        if (coupleError.code === 'PGRST116') {
-          console.log('No couple found, redirecting to dashboard')
-          router.push('/dashboard')
-          return
-        }
-        throw coupleError
-      }
-
-      setCouple(coupleData as unknown as Couple)
-    } catch (err) {
-      console.error('Error fetching couple:', err)
-      setError('Erro ao carregar dados do casal')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleSectionUpdate = (data: any) => {
     console.log('Settings update:', data)
     console.log('🖼️ Settings update - hero_background_image:', data.hero_background_image)
     
     // Atualizar o couple state com novos dados
-    setCouple(prev => prev ? { ...prev, ...data } : null)
+    if (couple) {
+      updateLocalCouple({ ...couple, ...data } as Couple)
+    }
     
     // Regenerar template com novos dados
     if (couple) {
@@ -101,27 +72,21 @@ export default function SettingsPage() {
   }
 
   const handlePublishSite = async () => {
-    if (!couple) return
+    if (!couple || !user?.id) return
 
     try {
       setIsPublishing(true)
       setPublishMessage('')
       
-      const supabase = createClient()
-      
-      const { error } = await supabase
-        .from('couples')
-        .update({ 
-          is_published: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', couple.id)
+      const { success, error } = await coupleService.togglePublish(user.id, true)
 
-      if (error) {
-        throw error
+      if (!success) {
+        throw new Error(error)
       }
 
-      setCouple(prev => prev ? { ...prev, is_published: true } as any : null)
+      if (couple) {
+        updateLocalCouple({ ...couple, is_published: true } as Couple)
+      }
       setPublishMessage('✅ Site publicado com sucesso!')
       
       setTimeout(() => {
@@ -139,13 +104,48 @@ export default function SettingsPage() {
     }
   }
 
-  // Loading state
-  if (loading || isLoading) {
+  // Loading state - separar loading de auth vs loading de dados
+  console.log('🎯 Render check - Loading states:', {
+    initialized,
+    authLoading: loading,
+    dataLoading: isLoading,
+    hasUser: !!user,
+    hasCouple: !!couple
+  })
+
+  if (!initialized) {
+    console.log('🔄 Rendering: Auth not initialized')
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando configurações...</p>
+          <p className="text-gray-600">Verificando autenticação...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Auth state - usuário não está logado
+  if (initialized && !loading && !user) {
+    console.log('🔄 Rendering: User not logged in, redirecting')
+    router.push('/login')
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Data loading state
+  if (user && isLoading) {
+    console.log('🔄 Rendering: Data loading state')
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando dados do casal...</p>
         </div>
       </div>
     )
@@ -179,7 +179,11 @@ export default function SettingsPage() {
   })) || []
 
   return (
-            <ThemeProvider coupleId={couple?.id}>
+    <ThemeProvider 
+      coupleId={couple?.id} 
+      userId={user?.id} 
+      coupleData={couple} // 🌟 Dados sempre sincronizados com useCouple
+    >
       <div className="min-h-screen bg-gray-50">
         {/* Header Principal - Mais Limpo */}
         <motion.header
@@ -230,7 +234,7 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Theme Selector */}
+              {/* Theme Selector - 🌟 Agora usa dados unificados */}
               <ThemeSelector />
 
               {/* Publish button */}
@@ -248,22 +252,10 @@ export default function SettingsPage() {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Publicar
+                    Publicar Site
                   </>
                 )}
               </Button>
-
-              {/* View site button */}
-              {(couple as any)?.is_published && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => couple && window.open(`/${couple.slug}`, '_blank')}
-                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                >
-                  Ver Site
-                </Button>
-              )}
             </div>
           </div>
 
@@ -378,6 +370,7 @@ export default function SettingsPage() {
                               <UnifiedSettings 
                   initialCouple={couple} 
                   onDataChange={handleSectionUpdate}
+                  onCoupleUpdate={updateLocalCouple}
                 />
             </div>
           )}
