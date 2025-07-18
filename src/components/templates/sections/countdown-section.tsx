@@ -6,7 +6,9 @@ import Countdown from 'react-countdown';
 import { TemplateSection, WeddingTemplate, CountdownSectionData } from '@/types/template';
 import { InlineEditor } from '../inline-editor';
 import { getThemeStyles } from '@/lib/utils/theme-utils';
-import { Heart, Calendar, Clock, Star, Sparkles, Zap, Timer, ArrowDown } from 'lucide-react';
+import { Heart, Calendar, Clock, Star, Sparkles, Zap, Timer } from 'lucide-react';
+// import Lottie from 'lottie-react';
+// import heartAnimation from '@/public/animations/heart-floating.json';
 
 interface CountdownSectionProps {
   section: TemplateSection;
@@ -45,6 +47,20 @@ const getModernTypography = (theme: any) => ({
     fontWeight: '500',
     letterSpacing: '0.08em',
     textTransform: 'uppercase' as const,
+  },
+  // ✨ NOVA: Tipografia elegante para data
+  date: {
+    fontFamily: "'Playfair Display', 'Georgia', serif",
+    fontWeight: '500',
+    letterSpacing: '-0.01em',
+    lineHeight: '1.4',
+  },
+  // ✨ NOVA: Tipografia para frase romântica
+  romantic: {
+    fontFamily: "'Dancing Script', 'Brush Script MT', cursive",
+    fontWeight: '600',
+    letterSpacing: '0.02em',
+    lineHeight: '1.3',
   }
 });
 
@@ -57,6 +73,18 @@ export function CountdownSection({
   const data = section.data as CountdownSectionData;
   const themeStyles = getThemeStyles(template);
   const typography = getModernTypography(themeStyles);
+
+  // ✨ GARANTIR CORES NEUTRAS E ELEGANTES
+  const neutralThemeStyles = {
+    ...themeStyles,
+    // Forçar cores mais neutras e elegantes
+    primary: themeStyles.primary || '#2d3748',
+    secondary: themeStyles.secondary || '#4a5568', 
+    accent: themeStyles.accent && !themeStyles.accent.includes('#ed7a5e') ? themeStyles.accent : '#6b7280',
+    background: '#ffffff',
+    text: themeStyles.text || '#1a202c',
+    textSecondary: themeStyles.textSecondary || '#4a5568'
+  };
 
   const [timeLeft, setTimeLeft] = useState<TimeUnit[]>([
     { value: 0, label: 'DIAS' },
@@ -114,11 +142,11 @@ export function CountdownSection({
               rgba(255, 255, 255, 0.05) 50%, 
               rgba(255, 255, 255, 0.02) 100%
             ), 
-            ${themeStyles.primary}08
+            ${neutralThemeStyles.primary}08
           `,
           boxShadow: `
-            0 20px 40px -12px ${themeStyles.primary}20,
-            0 0 0 1px ${themeStyles.primary}15,
+            0 20px 40px -12px ${neutralThemeStyles.primary}20,
+            0 0 0 1px ${neutralThemeStyles.primary}15,
             inset 0 2px 0 rgba(255, 255, 255, 0.15),
             inset 0 -2px 0 rgba(0, 0, 0, 0.05)
           `
@@ -127,7 +155,7 @@ export function CountdownSection({
         {/* Pulse Effect Ring */}
         <motion.div
           className="absolute inset-0 rounded-3xl border-2 opacity-0"
-          style={{ borderColor: themeStyles.primary }}
+          style={{ borderColor: neutralThemeStyles.primary }}
           animate={{ 
             scale: [1, 1.1, 1],
             opacity: [0, 0.3, 0]
@@ -146,7 +174,7 @@ export function CountdownSection({
               key={i}
               className="absolute w-1 h-1 rounded-full opacity-40"
               style={{ 
-                backgroundColor: themeStyles.accent,
+                backgroundColor: neutralThemeStyles.accent,
                 left: `${20 + Math.random() * 60}%`,
                 top: `${20 + Math.random() * 60}%`,
               }}
@@ -171,7 +199,7 @@ export function CountdownSection({
           style={{
             background: `linear-gradient(90deg, 
               transparent 0%, 
-              ${themeStyles.primary}20 50%, 
+              ${neutralThemeStyles.primary}20 50%, 
               transparent 100%
             )`,
           }}
@@ -190,7 +218,7 @@ export function CountdownSection({
         <motion.div
           className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{
-            background: `radial-gradient(circle at center, ${themeStyles.primary}15 0%, transparent 70%)`,
+            background: `radial-gradient(circle at center, ${neutralThemeStyles.primary}15 0%, transparent 70%)`,
           }}
         />
 
@@ -227,12 +255,12 @@ export function CountdownSection({
                 className="text-5xl md:text-6xl font-bold relative"
                 style={{
                   ...typography.counter,
-                  color: themeStyles.primary,
-                  textShadow: `0 4px 8px ${themeStyles.primary}20`,
+                  color: neutralThemeStyles.primary,
+                  textShadow: `0 4px 8px ${neutralThemeStyles.primary}20`,
                 }}
                 whileHover={{ 
                   scale: 1.1,
-                  textShadow: `0 6px 12px ${themeStyles.primary}30`,
+                  textShadow: `0 6px 12px ${neutralThemeStyles.primary}30`,
                 }}
               >
                 {unit.value.toString().padStart(2, '0')}
@@ -241,7 +269,7 @@ export function CountdownSection({
                 <span
                   className="absolute inset-0 opacity-20 blur-sm"
                   style={{
-                    background: `linear-gradient(to bottom, ${themeStyles.primary}, transparent)`,
+                    background: `linear-gradient(to bottom, ${neutralThemeStyles.primary}, transparent)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -265,7 +293,7 @@ export function CountdownSection({
             className="text-sm md:text-base font-medium opacity-80 tracking-wider"
             style={{
               ...typography.label,
-              color: themeStyles.textSecondary,
+              color: neutralThemeStyles.textSecondary,
             }}
             whileHover={{ 
               opacity: 1,
@@ -279,7 +307,7 @@ export function CountdownSection({
           {/* Label Underline Effect */}
           <motion.div
             className="absolute bottom-0 left-1/2 h-0.5 bg-current opacity-0 group-hover:opacity-100"
-            style={{ backgroundColor: themeStyles.accent }}
+            style={{ backgroundColor: neutralThemeStyles.accent }}
             initial={{ width: 0, x: '-50%' }}
             whileHover={{ width: '100%' }}
             transition={{ duration: 0.3 }}
@@ -290,7 +318,7 @@ export function CountdownSection({
         <div className="absolute top-4 right-4 flex gap-2">
           <motion.div 
             className="w-2 h-2 rounded-full opacity-60"
-            style={{ backgroundColor: themeStyles.accent }}
+            style={{ backgroundColor: neutralThemeStyles.accent }}
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.6, 1, 0.6],
@@ -306,25 +334,24 @@ export function CountdownSection({
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Zap className="w-3 h-3 opacity-40" style={{ color: themeStyles.accent }} />
+              <Zap className="w-3 h-3 opacity-40" style={{ color: neutralThemeStyles.accent }} />
             </motion.div>
           )}
         </div>
 
         {/* Corner Accents */}
         <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 opacity-20 rounded-bl-lg"
-             style={{ borderColor: themeStyles.primary }} />
+             style={{ borderColor: neutralThemeStyles.primary }} />
         <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 opacity-20 rounded-tr-lg"
-             style={{ borderColor: themeStyles.primary }} />
+             style={{ borderColor: neutralThemeStyles.primary }} />
       </div>
 
       {/* Card Shadow/Reflection */}
       <motion.div
         className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"
         style={{
-          background: `linear-gradient(135deg, ${themeStyles.primary}05 0%, transparent 100%)`,
+          background: `linear-gradient(135deg, ${neutralThemeStyles.primary}05 0%, transparent 100%)`,
           transform: 'translateY(8px) scale(0.95)',
-          filter: 'blur(8px)',
         }}
       />
     </motion.div>
@@ -337,95 +364,108 @@ export function CountdownSection({
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       style={{
-        backgroundColor: section.style.backgroundColor || themeStyles.background,
-        color: section.style.textColor || themeStyles.text,
+        backgroundColor: '#ffffff',
+        color: section.style.textColor || neutralThemeStyles.text,
       }}
     >
-      {/* 🌟 BACKGROUND MODERNO */}
+      {/* 🌟 BACKGROUND MODERNO HARMONIZADO COM TEMAS */}
       <div className="absolute inset-0">
-                 {/* Background Base */}
-         <div 
-           className="absolute inset-0"
-           style={{
-             background: `${themeStyles.primary}03`
-           }}
-         />
+        {/* Background Base Harmonizado */}
+        <motion.div 
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(135deg, 
+                ${themeStyles.background || '#ffffff'} 0%,
+                ${themeStyles.background || '#f8fafc'} 100%
+              )
+            `
+          }}
+        />
         
-                 {/* Floating Elements Modernos e Intuitivos */}
-         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-           {[...Array(12)].map((_, i) => (
-             <motion.div
-               key={i}
-               className="absolute"
-               style={{
-                 left: `${5 + Math.random() * 90}%`,
-                 top: `${5 + Math.random() * 90}%`,
-               }}
-               animate={{
-                 y: [0, -30 - Math.random() * 20, 0],
-                 x: [0, 15 - Math.random() * 30, 0],
-                 opacity: [0.1, 0.4, 0.1],
-                 scale: [1, 1.3 + Math.random() * 0.5, 1],
-                 rotate: [0, 180, 360],
-               }}
-               transition={{
-                 duration: 10 + Math.random() * 8,
-                 repeat: Infinity,
-                 delay: Math.random() * 6,
-                 ease: "easeInOut"
-               }}
-             >
-               {i % 4 === 0 ? (
-                 <Heart className="w-3 h-3" style={{ color: themeStyles.primary }} />
-               ) : i % 4 === 1 ? (
-                 <Star className="w-2 h-2" style={{ color: themeStyles.secondary }} />
-               ) : i % 4 === 2 ? (
-                 <Sparkles className="w-4 h-4" style={{ color: themeStyles.accent }} />
-               ) : (
-                 <motion.div
-                   className="w-1 h-1 rounded-full"
-                   style={{ backgroundColor: themeStyles.primary }}
-                   animate={{
-                     scale: [1, 2, 1],
-                     opacity: [0.3, 0.8, 0.3],
-                   }}
-                   transition={{
-                     duration: 2,
-                     repeat: Infinity,
-                     delay: Math.random() * 2
-                   }}
-                 />
-               )}
-             </motion.div>
-           ))}
-         </div>
-
-         {/* Ambient Light Effects */}
-         <motion.div
-           className="absolute inset-0 opacity-20"
-           animate={{
-             background: [
-               `radial-gradient(circle at 20% 30%, ${themeStyles.primary}10 0%, transparent 50%)`,
-               `radial-gradient(circle at 80% 70%, ${themeStyles.secondary}10 0%, transparent 50%)`,
-               `radial-gradient(circle at 50% 50%, ${themeStyles.accent}10 0%, transparent 50%)`,
-               `radial-gradient(circle at 20% 30%, ${themeStyles.primary}10 0%, transparent 50%)`
-             ]
-           }}
-           transition={{
-             duration: 15,
-             repeat: Infinity,
-             ease: "easeInOut"
-           }}
-         />
-
-        {/* Grid Pattern */}
+        {/* Overlay Pattern Harmonizado */}
         <div 
           className="absolute inset-0 opacity-[0.02]"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, ${themeStyles.primary} 1px, transparent 0)`,
-            backgroundSize: '24px 24px'
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, ${neutralThemeStyles.primary} 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, ${neutralThemeStyles.secondary} 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px, 90px 90px'
           }}
         />
+
+        {/* Tema-Specific Accent Elements - Muito Sutis */}
+        <motion.div
+          className="absolute inset-0 opacity-[0.03]"
+                     style={{
+             background: `
+               radial-gradient(ellipse 800px 600px at 20% 40%, ${neutralThemeStyles.primary}08 0%, transparent 50%),
+               radial-gradient(ellipse 600px 800px at 80% 60%, ${neutralThemeStyles.secondary}05 0%, transparent 50%)
+             `
+           }}
+          animate={{
+            opacity: [0.02, 0.04, 0.02],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* Floating Elements Harmonizados com Tema */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute"
+              style={{
+                left: `${15 + Math.random() * 70}%`,
+                top: `${15 + Math.random() * 70}%`,
+              }}
+              animate={{
+                y: [0, -50 - Math.random() * 30, 0],
+                x: [0, 25 - Math.random() * 50, 0],
+                opacity: [0.05, 0.15, 0.05],
+                scale: [1, 1.3 + Math.random() * 0.3, 1],
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 20 + Math.random() * 15,
+                repeat: Infinity,
+                delay: Math.random() * 10,
+                ease: "easeInOut"
+              }}
+            >
+              {i % 3 === 0 ? (
+                <Heart className="w-3 h-3" style={{ color: neutralThemeStyles.primary, opacity: 0.3 }} />
+                // ✨ OPÇÃO COM LOTTIE (comentado para não quebrar o build):
+                // <Lottie 
+                //   animationData={heartAnimation} 
+                //   className="w-8 h-8"
+                //   style={{ filter: `hue-rotate(${i * 45}deg)` }}
+                // />
+              ) : i % 3 === 1 ? (
+                <Sparkles className="w-2 h-2" style={{ color: neutralThemeStyles.secondary, opacity: 0.25 }} />
+              ) : (
+                <motion.div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: neutralThemeStyles.accent || neutralThemeStyles.primary, opacity: 0.2 }}
+                  animate={{
+                    scale: [1, 2, 1],
+                    opacity: [0.1, 0.3, 0.1],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    delay: Math.random() * 4
+                  }}
+                />
+              )}
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
@@ -437,14 +477,7 @@ export function CountdownSection({
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Background para Edição */}
-              <div 
-                className="absolute inset-0 rounded-2xl backdrop-blur-sm border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -m-4"
-                style={{
-                  background: `${themeStyles.primary}08`,
-                  boxShadow: `0 8px 32px -8px ${themeStyles.primary}20`
-                }}
-              />
+
               
               <InlineEditor
                 field={data.title}
@@ -453,18 +486,21 @@ export function CountdownSection({
                 className="relative z-10 text-4xl md:text-5xl lg:text-6xl font-bold"
                 style={{
                   ...typography.title,
-                  color: themeStyles.primary,
-                  textShadow: `0 2px 4px ${themeStyles.primary}15`,
+                  color: neutralThemeStyles.primary,
+                  textShadow: `0 2px 4px ${neutralThemeStyles.primary}15`,
+                  fontFamily: "'Playfair Display', 'Cormorant Garamond', 'Georgia', serif",
+                  fontWeight: '600',
+                  letterSpacing: '-0.02em',
                 }}
                 template={template}
               />
               
               {/* Edit Indicator */}
               <motion.div
-                className="absolute -top-3 -right-3 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute -top-3 -right-3 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
                 style={{
-                  background: themeStyles.accent,
-                  boxShadow: `0 2px 8px ${themeStyles.accent}40`
+                  background: neutralThemeStyles.accent,
+                  boxShadow: `0 2px 8px ${neutralThemeStyles.accent}40`
                 }}
                 animate={{
                   scale: [1, 1.1, 1],
@@ -485,8 +521,8 @@ export function CountdownSection({
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
               style={{
                 ...typography.title,
-                color: themeStyles.primary,
-                textShadow: `0 2px 4px ${themeStyles.primary}15`,
+                color: neutralThemeStyles.primary,
+                textShadow: `0 2px 4px ${neutralThemeStyles.primary}15`,
               }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -527,12 +563,12 @@ export function CountdownSection({
                 scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
               }}
             >
-              <Timer className="w-6 h-6 opacity-70" style={{ color: themeStyles.primary }} />
+              <Timer className="w-6 h-6 opacity-70" style={{ color: neutralThemeStyles.primary }} />
               
               {/* Pulse Ring */}
               <motion.div
                 className="absolute inset-0 rounded-full border-2 opacity-0"
-                style={{ borderColor: themeStyles.primary }}
+                style={{ borderColor: neutralThemeStyles.primary }}
                 animate={{
                   scale: [1, 2],
                   opacity: [0.5, 0],
@@ -591,7 +627,7 @@ export function CountdownSection({
                     className="text-3xl md:text-4xl font-bold mb-4"
                     style={{
                       ...typography.title,
-                      color: themeStyles.primary,
+                      color: neutralThemeStyles.primary,
                     }}
                   >
                     Felizes para sempre!
@@ -600,7 +636,7 @@ export function CountdownSection({
                     className="text-xl opacity-75"
                     style={{
                       ...typography.subtitle,
-                      color: themeStyles.textSecondary,
+                      color: neutralThemeStyles.textSecondary,
                     }}
                   >
                     O casamento já aconteceu e foi maravilhoso! 💕
@@ -618,138 +654,134 @@ export function CountdownSection({
             ];
 
             return (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto mb-12">
-                {newTimeLeft.map((unit, index) => renderAnimatedNumber(unit, index))}
-              </div>
+              <>
+                {/* Countdown Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto mb-8">
+                  {newTimeLeft.map((unit, index) => renderAnimatedNumber(unit, index))}
+                </div>
+
+                {/* ✨ NOVA: Frase Romântica Embaixo da Contagem */}
+                <motion.div 
+                  className="text-center mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2, duration: 0.8 }}
+                >
+                  <motion.div
+                    className="relative inline-block"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                                         {/* Background Decorativo */}
+                     <motion.div
+                       className="absolute inset-0 rounded-2xl opacity-80 -m-4 z-0"
+                       style={{
+                         background: `
+                           linear-gradient(135deg, 
+                             ${neutralThemeStyles.primary}08 0%, 
+                             ${neutralThemeStyles.secondary}06 50%,
+                             ${neutralThemeStyles.accent || neutralThemeStyles.primary}04 100%
+                           )
+                         `,
+                         backdropFilter: 'blur(10px)',
+                         border: `1px solid ${neutralThemeStyles.primary}20`
+                       }}
+                                             animate={{
+                         background: [
+                           `linear-gradient(135deg, ${neutralThemeStyles.primary}08 0%, ${neutralThemeStyles.secondary}06 50%, ${neutralThemeStyles.accent || neutralThemeStyles.primary}04 100%)`,
+                           `linear-gradient(135deg, ${neutralThemeStyles.secondary}06 0%, ${neutralThemeStyles.accent || neutralThemeStyles.primary}04 50%, ${neutralThemeStyles.primary}08 100%)`,
+                           `linear-gradient(135deg, ${neutralThemeStyles.primary}08 0%, ${neutralThemeStyles.secondary}06 50%, ${neutralThemeStyles.accent || neutralThemeStyles.primary}04 100%)`
+                         ]
+                       }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+
+                    <motion.p
+                      className="relative z-10 text-2xl md:text-3xl lg:text-4xl px-6 py-3"
+                                             style={{
+                         ...typography.romantic,
+                         color: neutralThemeStyles.primary,
+                         textShadow: `0 2px 8px ${neutralThemeStyles.primary}20`,
+                       }}
+                      animate={{
+                        y: [0, -3, 0],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      dias para o{' '}
+                      <motion.span
+                                                 style={{ 
+                           color: neutralThemeStyles.accent || neutralThemeStyles.secondary,
+                           fontWeight: '700'
+                         }}
+                        animate={{
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        "sim, eu aceito"
+                      </motion.span>
+                    </motion.p>
+
+                                         {/* Decorative Hearts */}
+                     <motion.div
+                       className="absolute -top-2 -left-2 z-20"
+                       animate={{
+                         rotate: [0, 15, -15, 0],
+                         scale: [1, 1.2, 1],
+                       }}
+                       transition={{
+                         duration: 3,
+                         repeat: Infinity,
+                         ease: "easeInOut"
+                       }}
+                     >
+                       <Heart 
+                         className="w-4 h-4 fill-current" 
+                         style={{ color: neutralThemeStyles.accent || neutralThemeStyles.primary }}
+                       />
+                     </motion.div>
+
+                     <motion.div
+                       className="absolute -bottom-2 -right-2 z-20"
+                       animate={{
+                         rotate: [0, -15, 15, 0],
+                         scale: [1, 1.2, 1],
+                       }}
+                       transition={{
+                         duration: 3,
+                         repeat: Infinity,
+                         ease: "easeInOut",
+                         delay: 1.5
+                       }}
+                     >
+                       <Heart 
+                         className="w-4 h-4 fill-current" 
+                         style={{ color: neutralThemeStyles.accent || neutralThemeStyles.primary }}
+                       />
+                     </motion.div>
+                  </motion.div>
+                </motion.div>
+              </>
             );
           }}
         />
 
-                 {/* 💬 MENSAGEM DO COUNTDOWN COM EFEITOS MODERNOS */}
-         {('message' in data && data.message?.value) && (
-           <motion.div 
-             className="text-center mb-12 relative"
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.6, duration: 0.6 }}
-           >
-             {/* Background Elegante para Edição */}
-             <motion.div
-               className="absolute inset-0 rounded-2xl backdrop-blur-md border border-white/20 -m-6"
-               style={{
-                 background: `
-                                       linear-gradient(135deg, 
-                      ${themeStyles.background || '#ffffff'}90 0%, 
-                      ${themeStyles.background || '#f8fafc'}80 100%
-                    )
-                 `,
-                 boxShadow: `
-                   0 20px 40px -12px ${themeStyles.primary}15,
-                   inset 0 1px 0 rgba(255, 255, 255, 0.2)
-                 `
-               }}
-               initial={{ scale: 0.9, opacity: 0 }}
-               animate={{ scale: 1, opacity: 1 }}
-               transition={{ delay: 0.8, duration: 0.6 }}
-             />
 
-             {isEditable ? (
-               <motion.div
-                 className="relative z-10 group"
-                 whileHover={{ scale: 1.03 }}
-                 transition={{ duration: 0.3 }}
-               >
-                 <InlineEditor
-                   field={data.message}
-                   value={data.message.value}
-                   onSave={(value) => onFieldUpdate('message', String(value))}
-                   className="text-xl md:text-2xl font-medium px-4 py-2 rounded-xl"
-                   style={{
-                     ...typography.subtitle,
-                                           color: themeStyles.text || themeStyles.primary,
-                     textShadow: `0 1px 2px ${themeStyles.primary}10`,
-                     background: 'transparent',
-                     border: `2px dashed ${themeStyles.primary}30`,
-                   }}
-                   template={template}
-                 />
-                 
-                 {/* Edit Hint */}
-                 <motion.div
-                   className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                   style={{ color: themeStyles.textSecondary }}
-                 >
-                   <span className="text-xs font-medium bg-white/90 px-3 py-1 rounded-full shadow-sm">
-                     Clique para editar
-                   </span>
-                 </motion.div>
-               </motion.div>
-             ) : (
-               <motion.div 
-                 className="relative z-10"
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ delay: 1, duration: 0.6 }}
-               >
-                 <motion.p
-                   className="text-xl md:text-2xl font-medium opacity-90 relative"
-                   style={{
-                     ...typography.subtitle,
-                     color: themeStyles.textSecondary,
-                   }}
-                   animate={{
-                     y: [0, -2, 0],
-                   }}
-                   transition={{
-                     duration: 4,
-                     repeat: Infinity,
-                     ease: "easeInOut"
-                   }}
-                 >
-                   {data.message.value}
-                   
-                   {/* Text Glow Effect */}
-                   <motion.span
-                     className="absolute inset-0 opacity-20 blur-sm"
-                     style={{
-                       color: themeStyles.primary,
-                     }}
-                     animate={{
-                       opacity: [0.1, 0.3, 0.1],
-                     }}
-                     transition={{
-                       duration: 3,
-                       repeat: Infinity,
-                       ease: "easeInOut"
-                     }}
-                   >
-                     {data.message.value}
-                   </motion.span>
-                 </motion.p>
 
-                 {/* Decorative Arrow */}
-                 <motion.div
-                   className="flex justify-center mt-4"
-                   animate={{
-                     y: [0, 8, 0],
-                   }}
-                   transition={{
-                     duration: 2,
-                     repeat: Infinity,
-                     ease: "easeInOut"
-                   }}
-                 >
-                   <ArrowDown 
-                     className="w-5 h-5 opacity-40" 
-                     style={{ color: themeStyles.primary }} 
-                   />
-                 </motion.div>
-               </motion.div>
-             )}
-           </motion.div>
-         )}
-
-         {/* 📅 DATA DO EVENTO COM EDIÇÃO APRIMORADA */}
+         {/* �� DATA DO EVENTO COM TIPOGRAFIA MODERNA E ELEGANTE */}
          <motion.div 
            className="text-center"
            initial={{ opacity: 0, y: 20 }}
@@ -762,12 +794,17 @@ export function CountdownSection({
                whileHover={{ scale: 1.05 }}
                transition={{ duration: 0.2 }}
              >
-               {/* Background Editável */}
+               {/* Background Editável Elegante */}
                <div 
-                 className="absolute inset-0 rounded-xl backdrop-blur-sm border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -m-3"
+                 className="absolute inset-0 rounded-xl backdrop-blur-sm border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -m-4"
                  style={{
-                                       background: `${themeStyles.background || '#ffffff'}80`,
-                   boxShadow: `0 8px 32px -8px ${themeStyles.primary}20`
+                                       background: `
+                      linear-gradient(135deg, 
+                        ${neutralThemeStyles.background || '#ffffff'}95 0%, 
+                        ${neutralThemeStyles.primary}10 100%
+                      )
+                    `,
+                    boxShadow: `0 8px 32px -8px ${neutralThemeStyles.primary}25`
                  }}
                />
                
@@ -775,30 +812,70 @@ export function CountdownSection({
                  field={data.targetDate}
                  value={data.targetDate.value}
                  onSave={(value) => onFieldUpdate('targetDate', String(value))}
-                 className="relative z-10 px-4 py-2 rounded-lg font-medium"
+                 className="relative z-10 px-6 py-3 rounded-lg font-medium"
                  style={{
-                   ...typography.subtitle,
-                                       color: themeStyles.text || themeStyles.primary,
-                   border: `1px solid ${themeStyles.primary}30`,
-                   background: 'rgba(255, 255, 255, 0.5)',
+                   ...typography.date, // ✨ NOVA tipografia elegante
+                                     color: neutralThemeStyles.primary,
+                  border: `2px solid ${neutralThemeStyles.primary}30`,
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '1.25rem',
+                  textShadow: `0 1px 3px ${neutralThemeStyles.primary}15`,
                  }}
                  template={template}
                />
              </motion.div>
            ) : (
-             <div className="flex items-center justify-center gap-3">
+             <motion.div 
+               className="flex items-center justify-center gap-4 relative"
+               whileHover={{ scale: 1.02 }}
+               transition={{ duration: 0.3 }}
+             >
+                               {/* Background Decorativo */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl opacity-60 -m-6 z-0"
+                  style={{
+                    background: `
+                      linear-gradient(135deg, 
+                        ${neutralThemeStyles.primary}08 0%, 
+                        ${neutralThemeStyles.secondary}06 50%,
+                        transparent 100%
+                      )
+                    `,
+                    backdropFilter: 'blur(8px)',
+                    border: `1px solid ${neutralThemeStyles.primary}15`
+                  }}
+                 animate={{
+                   opacity: [0.4, 0.7, 0.4],
+                 }}
+                 transition={{
+                   duration: 6,
+                   repeat: Infinity,
+                   ease: "easeInOut"
+                 }}
+               />
+
                <motion.div
+                 className="relative z-10"
                  animate={{ rotate: [0, 15, -15, 0] }}
-                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                >
-                 <Clock className="w-5 h-5 opacity-60" style={{ color: themeStyles.primary }} />
+                 <Calendar className="w-6 h-6 opacity-70" style={{ color: neutralThemeStyles.primary }} />
                </motion.div>
-               <p
-                 className="text-lg md:text-xl font-medium"
+
+               <motion.p
+                 className="relative z-10 text-xl md:text-2xl lg:text-3xl font-medium px-4"
                  style={{
-                   ...typography.subtitle,
-                   color: themeStyles.textSecondary,
-                   textShadow: `0 1px 2px ${themeStyles.primary}10`,
+                   ...typography.date, // ✨ NOVA tipografia elegante
+                   color: neutralThemeStyles.primary,
+                   textShadow: `0 2px 6px ${neutralThemeStyles.primary}20`,
+                 }}
+                 animate={{
+                   y: [0, -2, 0],
+                 }}
+                 transition={{
+                   duration: 4,
+                   repeat: Infinity,
+                   ease: "easeInOut"
                  }}
                >
                  {new Date(data.targetDate.value).toLocaleDateString('pt-BR', {
@@ -807,8 +884,28 @@ export function CountdownSection({
                    month: 'long',
                    day: 'numeric'
                  })}
-               </p>
-             </div>
+               </motion.p>
+
+                               {/* Sparkle Effect */}
+                <motion.div
+                  className="absolute top-0 right-0 z-20"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    rotate: [0, 180, 360],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Sparkles 
+                    className="w-5 h-5" 
+                    style={{ color: neutralThemeStyles.accent || neutralThemeStyles.secondary }}
+                  />
+                </motion.div>
+             </motion.div>
            )}
          </motion.div>
       </div>

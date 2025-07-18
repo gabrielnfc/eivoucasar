@@ -107,7 +107,6 @@ export interface InvitationSectionData {
 export interface CountdownSectionData {
   title: EditableField;
   targetDate: EditableField;
-  message: EditableField;
 }
 
 export interface StorySectionData {

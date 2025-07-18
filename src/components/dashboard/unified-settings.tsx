@@ -42,7 +42,6 @@ const unifiedSettingsSchema = z.object({
   
   // Campos de contagem regressiva
   countdown_title: z.string().optional(),
-  countdown_message: z.string().optional(),
   
   // Campos de imagem
   bride_photo: z.string().optional(),
@@ -137,7 +136,7 @@ const SECTION_FIELDS = {
     title: 'Contagem Regressiva',
     icon: Timer,
     color: 'amber',
-    fields: ['countdown_title', 'countdown_message'],
+    fields: ['countdown_title'],
     description: 'Configurações da contagem regressiva'
   },
   'venue': {
@@ -331,13 +330,7 @@ const FIELD_CONFIG = {
     placeholder: 'Ex: Faltam apenas...',
     helpText: 'Título da contagem regressiva'
   },
-  countdown_message: {
-    label: 'Mensagem da Contagem',
-    type: 'text',
-    icon: Timer,
-    placeholder: 'Ex: Para o grande dia!',
-    helpText: 'Mensagem que acompanha a contagem'
-  },
+
   bride_photo: {
     label: 'Foto da Noiva',
     type: 'image',
@@ -651,7 +644,6 @@ const UnifiedSettings = memo(function UnifiedSettings({ initialCouple, onDataCha
       engagement_date: mappedData.engagement_date || '',
       engagement_story: mappedData.engagement_story || '',
       countdown_title: mappedData.countdown_title || '',
-      countdown_message: mappedData.countdown_message || '',
       bride_photo: mappedData.bride_photo || '',
       groom_photo: mappedData.groom_photo || '',
       cover_photo_url: mappedData.cover_photo_url || '',

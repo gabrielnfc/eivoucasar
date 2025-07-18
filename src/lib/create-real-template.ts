@@ -27,7 +27,6 @@ interface CoupleData {
   
   // Campos de contagem regressiva
   countdown_title?: string;
-  countdown_message?: string;
   
   // Campos de imagem
   bride_photo?: string;
@@ -267,8 +266,7 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
         },
         data: {
           title: { id: 'title', type: 'text', value: coupleData.countdown_title || 'Faltam apenas...' },
-          targetDate: { id: 'targetDate', type: 'date', value: getDateInputValue(coupleData.wedding_date) },
-          message: { id: 'message', type: 'textarea', value: coupleData.countdown_message || 'Dias para o nosso grande dia!' }
+          targetDate: { id: 'targetDate', type: 'date', value: getDateInputValue(coupleData.wedding_date) }
         },
         settings: {
           showTitle: true,

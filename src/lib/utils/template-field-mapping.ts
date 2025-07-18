@@ -29,7 +29,7 @@ export const TEMPLATE_TO_DB_FIELD_MAPPING: Record<string, string> = {
 
   // ⏰ SEÇÃO COUNTDOWN
   'countdown.title': 'countdown_title',
-  'countdown.message': 'countdown_message',
+
   'countdown.targetDate': 'wedding_date',
 
   // 🏛️ SEÇÃO VENUE
