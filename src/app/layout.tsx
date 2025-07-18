@@ -80,6 +80,19 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="pt-BR" className={inter.variable}>
+			    <head>
+        {/* 🎭 FONTES ELEGANTES PARA ASSINATURAS */}
+        <link
+            href="https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Dancing+Script:wght@400;500;600;700&family=Allura:wght@400&family=Alex+Brush:wght@400&family=Kaushan+Script:wght@400&family=Satisfy:wght@400&family=Pacifico:wght@400&family=Courgette:wght@400&family=Lobster:wght@400&display=swap"
+            rel="stylesheet"
+        />
+        
+        {/* 📝 FONTES MODERNAS PARA TIPOGRAFIA REFINADA */}
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
 			<body className={`${inter.className} antialiased`}>
 				<CookieProvider>
 					<AuthProvider>

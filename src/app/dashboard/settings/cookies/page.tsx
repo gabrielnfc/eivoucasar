@@ -1,12 +1,47 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import CookieSettings from '@/components/cookies/cookie-settings';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/auth-context'
+import CookieSettings from '@/components/cookies/cookie-settings'
+import Loading from '@/components/ui/loading'
 
 export default function CookieSettingsPage() {
-  const router = useRouter();
+  const router = useRouter()
+  const { user, loading } = useAuth()
+  const [animationCompleted, setAnimationCompleted] = useState(false)
+
+  // ✅ LOADING COMPLETO - usuário só vê conteúdo após animação terminar
+  const isDataLoading = loading || !user;
+  const shouldShowLoading = isDataLoading || !animationCompleted;
+
+  let loadingMessage = 'Carregando configurações...';
+  if (loading) {
+    loadingMessage = 'Verificando autenticação...';
+  } else if (!user) {
+    loadingMessage = 'Autenticando usuário...';
+  } else if (!animationCompleted) {
+    loadingMessage = 'Finalizando carregamento...';
+  }
+
+  if (shouldShowLoading) {
+    return (
+      <Loading 
+        message={loadingMessage}
+        showTimeout={true}
+        timeoutSeconds={2}
+        onComplete={() => {
+          console.log('Cookies Settings: Animação completada');
+          // Só marcar como completo se os dados também estiverem carregados
+          if (!isDataLoading) {
+            setAnimationCompleted(true);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,5 +69,5 @@ export default function CookieSettingsPage() {
         <CookieSettings />
       </div>
     </div>
-  );
+  )
 } 

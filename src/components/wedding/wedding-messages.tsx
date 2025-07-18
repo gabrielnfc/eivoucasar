@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Heart, MessageCircle, Send, User, Mail } from 'lucide-react'
 import { useTenant } from '@/contexts/tenant-context'
-import { MessageCircle, Heart, Send, User, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Message } from '@/types'
 import toast from 'react-hot-toast'
@@ -122,7 +123,10 @@ export default function WeddingMessages() {
     })
   }
 
-  if (!couple) return null
+  // ✅ Seções não precisam loading de página - apenas renderizar vazio se carregando
+  if (isLoading || !couple) {
+    return null
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,12 +218,7 @@ export default function WeddingMessages() {
                 Mensagens dos Convidados
               </h3>
               
-              {isLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Carregando mensagens...</p>
-                </div>
-              ) : messages.length > 0 ? (
+              {messages.length > 0 ? (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {messages.map((message) => (
                     <div

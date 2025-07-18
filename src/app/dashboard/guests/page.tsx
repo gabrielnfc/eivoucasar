@@ -32,6 +32,7 @@ import { AddGroupModal } from '@/components/guests/add-group-modal';
 import { GuestStats } from '@/components/guests/guest-stats';
 import { CompleteProfile } from '@/components/auth/complete-profile';
 import { apiClient } from '@/lib/api-client';
+import Loading from '@/components/ui/loading';
 import type { Guest, GuestGroup } from '@/types/guest';
 
 export default function GuestsPage() {
@@ -44,6 +45,7 @@ export default function GuestsPage() {
 	const [showAddGuest, setShowAddGuest] = useState(false);
 	const [showAddGroup, setShowAddGroup] = useState(false);
 	const [loadingData, setLoadingData] = useState(true);
+	const [animationCompleted, setAnimationCompleted] = useState(false);
 	const [ref, inView] = useInView({
 		triggerOnce: true,
 		threshold: 0.1,
@@ -135,33 +137,35 @@ export default function GuestsPage() {
 		return matchesSearch && matchesGroup;
 	});
 
-	if (loading || !user) {
-		return (
-			<div className="min-h-screen relative overflow-hidden">
-				{/* Background Loading */}
-				<div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50/50 to-pink-50/30"></div>
+	// ✅ LOADING COMPLETO - usuário só vê conteúdo após animação terminar
+	const isDataLoading = loading || !user || loadingData;
+	const shouldShowLoading = isDataLoading || !animationCompleted;
 
-				<div className="relative z-10 min-h-screen flex items-center justify-center">
-					<motion.div
-						initial={{ opacity: 0, scale: 0.8 }}
-						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.8 }}
-						className="text-center"
-					>
-						<div className="w-20 h-20 mx-auto mb-6 relative">
-							<motion.div
-								className="w-full h-full border-4 border-indigo-300 border-t-indigo-600 rounded-full"
-								animate={{ rotate: 360 }}
-								transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-							/>
-							<Users className="absolute inset-0 m-auto w-8 h-8 text-indigo-600" />
-						</div>
-						<p className="text-gray-600 font-medium">
-							Carregando convidados...
-						</p>
-					</motion.div>
-				</div>
-			</div>
+	let loadingMessage = 'Carregando convidados...';
+	if (loading) {
+		loadingMessage = 'Verificando autenticação...';
+	} else if (!user) {
+		loadingMessage = 'Autenticando usuário...';
+	} else if (loadingData) {
+		loadingMessage = 'Carregando lista de convidados...';
+	} else if (!animationCompleted) {
+		loadingMessage = 'Finalizando carregamento...';
+	}
+
+	if (shouldShowLoading) {
+		return (
+			<Loading 
+				message={loadingMessage}
+				showTimeout={true}
+				timeoutSeconds={2}
+				onComplete={() => {
+					console.log('Guests: Animação completada');
+					// Só marcar como completo se os dados também estiverem carregados
+					if (!isDataLoading) {
+						setAnimationCompleted(true);
+					}
+				}}
+			/>
 		);
 	}
 

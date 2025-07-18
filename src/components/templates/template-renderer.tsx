@@ -18,6 +18,7 @@ import {
   TestimonialsSection,
   FooterSection
 } from './sections/temporary-sections';
+import Loading from '@/components/ui/loading';
 
 interface CoupleData {
   id: string;
@@ -160,31 +161,88 @@ export function TemplateRenderer({
   // Ordenar seções por ordem configurada
   const sortedSections = template ? [...template.sections].sort((a, b) => a.order - b.order) : [];
 
-  // Mapear campos de seção para campos do formulário
+  // Mapear campos de seção para campos do formulário - MAPEAMENTO COMPLETO
   const mapSectionFieldToFormField = (sectionId: string, fieldId: string): string | null => {
     const mappings: Record<string, Record<string, string>> = {
       'hero': {
         'brideName': 'bride_name',
         'groomName': 'groom_name',
         'weddingDate': 'wedding_date',
-        'location': 'wedding_location'
+        'weddingTime': 'wedding_time',
+        'location': 'wedding_location',
+        'subtitle': 'invitation_message',
+        'backgroundImage': 'hero_background_image'
       },
       'invitation': {
+        'title': 'invitation_title',
         'message': 'invitation_message',
-        'title': 'invitation_message'
+        'formalMessage': 'formal_invitation_message',
+        'signature': 'invitation_signature',
+        'invitationImage': 'cover_photo_url'
+      },
+      'countdown': {
+        'title': 'countdown_title',
+        'message': 'countdown_message',
+        'targetDate': 'wedding_date'
       },
       'story': {
+        'title': 'story_title',
         'story': 'couple_story',
-        'content': 'couple_story'
+        'content': 'couple_story',
+        'image': 'couple_photo'
+      },
+      'groomsmen': {
+        'title': 'groomsmen_title',
+        'subtitle': 'groomsmen_subtitle'
       },
       'venue': {
-        'ceremonyVenue': 'wedding_location',
-        'receptionVenue': 'wedding_address',
-        'address': 'wedding_address'
+        'title': 'venue_title',
+        'ceremonyTitle': 'ceremony_venue',
+        'ceremonyAddress': 'wedding_location',
+        'ceremonyTime': 'ceremony_time',
+        'ceremonyImage': 'ceremony_image',
+        'receptionTitle': 'reception_venue',
+        'receptionAddress': 'wedding_address',
+        'receptionTime': 'reception_time',
+        'receptionImage': 'reception_image',
+        'directions': 'directions',
+        'parkingInfo': 'parking_info'
+      },
+      'rsvp': {
+        'title': 'rsvp_title',
+        'subtitle': 'rsvp_subtitle',
+        'deadline': 'rsvp_deadline',
+        'message': 'rsvp_message',
+        'confirmationMessage': 'rsvp_confirmation_message'
+      },
+      'gamification': {
+        'title': 'gamification_title',
+        'subtitle': 'gamification_subtitle',
+        'pixKey': 'pix_key'
       },
       'details': {
-        'ceremonyTime': 'wedding_time',
-        'time': 'wedding_time'
+        'title': 'details_title',
+        'dressCode': 'dress_code',
+        'dressCodeDescription': 'dress_code_description',
+        'importantNotes': 'important_notes'
+      },
+      'gallery': {
+        'title': 'gallery_title',
+        'subtitle': 'gallery_subtitle'
+      },
+      'testimonials': {
+        'title': 'testimonials_title',
+        'subtitle': 'testimonials_subtitle',
+        'message': 'testimonials_message',
+        'autoApprove': 'testimonials_auto_approve'
+      },
+      'footer': {
+        'thankYouMessage': 'footer_thank_you_message',
+        'coupleSignature': 'footer_signature',
+        'weddingDate': 'wedding_date',
+        'weddingLocation': 'wedding_location',
+        'contactEmail': 'footer_contact_email',
+        'contactPhone': 'footer_contact_phone'
       }
     };
 
@@ -197,19 +255,21 @@ export function TemplateRenderer({
       onSectionUpdate(sectionId, fieldId, value);
     }
     
-    // Notificar mudanças para o formulário de configurações
-    const mappedFieldId = mapSectionFieldToFormField(sectionId, fieldId);
-    if (mappedFieldId) {
-      window.dispatchEvent(new CustomEvent('templateFieldUpdate', {
-        detail: { fieldId: mappedFieldId, value }
-      }));
+    // ⚠️ IMPORTANTE: Só disparar evento se estivermos no modo editor
+    // Previne loops quando mudanças vêm das configurações
+    if (isEditable) {
+      // Notificar mudanças para o formulário de configurações
+      const mappedFieldId = mapSectionFieldToFormField(sectionId, fieldId);
+      if (mappedFieldId) {
+        console.log('🔄 Template→Config: Disparando evento para', mappedFieldId, '=', value);
+        window.dispatchEvent(new CustomEvent('templateFieldUpdate', {
+          detail: { fieldId: mappedFieldId, value }
+        }));
+      }
     }
     
-    // Se não estiver no modo edição, podemos salvar diretamente na API
-    if (!isEditable && coupleId) {
-              // Em produção, fazer POST para /api/couples/[coupleId]/template
-      console.log('Saving to API:', { coupleId, sectionId, fieldId, value });
-    }
+    // 🚫 REMOVIDO: Saving direto da API - deixar apenas o UnifiedSettings salvar
+    // Evita conflitos e duplicação de saves
   };
 
   useEffect(() => {
@@ -260,7 +320,18 @@ export function TemplateRenderer({
         groom_photo: coupleData.groom_photo,
         theme_color: coupleData.theme_color,
         is_active: coupleData.is_active,
-        is_published: coupleData.is_published
+        is_published: coupleData.is_published,
+        
+        // 💌 CAMPOS DE INVITATION - ESSENCIAIS PARA SINCRONIZAÇÃO
+        invitation_title: coupleData.invitation_title,
+        invitation_message: coupleData.invitation_message,
+        formal_invitation_message: coupleData.formal_invitation_message,
+        invitation_signature: coupleData.invitation_signature,
+   
+      
+      // ⏰ CAMPOS DE COUNTDOWN PARA SINCRONIZAÇÃO
+      countdown_title: coupleData.countdown_title,
+      countdown_message: coupleData.countdown_message
       };
       
       const realTemplate = createRealTemplate(transformedData);
@@ -276,13 +347,7 @@ export function TemplateRenderer({
   }, [coupleId, slug, coupleData, initialTemplate]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div 
-          className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500"
-        />
-      </div>
-    );
+    return null; // Loading gerenciado pela página pai
   }
 
   if (error) {

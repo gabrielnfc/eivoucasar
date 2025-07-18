@@ -61,16 +61,36 @@ export default function LoginPage() {
 			const result = await signIn({ 
 				email, 
 				password,
-				rememberMe: rememberMe, // Pass remember me option to signIn
+				rememberMe: rememberMe,
 			});
 
 			if (result.success) {
-				await refreshUser();
-				router.push('/dashboard');
+				// ✅ OTIMIZADO: Delay reduzido de 200ms para 50ms + retry inteligente
+				// Aguardar propagação mínima do estado antes de refreshUser
+				setTimeout(async () => {
+					try {
+						await refreshUser();
+						router.push('/dashboard');
+					} catch (refreshError) {
+						console.error('Erro ao atualizar dados do usuário:', refreshError);
+						// ✅ OTIMIZADO: Retry uma vez antes de prosseguir
+						try {
+							await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+							await refreshUser();
+							router.push('/dashboard');
+						} catch (retryError) {
+							console.error('Retry falhou, prosseguindo sem dados do casal:', retryError);
+							// Mesmo com erro no refresh, permitir acesso ao dashboard
+							// pois a autenticação foi bem-sucedida
+							router.push('/dashboard');
+						}
+					}
+				}, 50); // Reduzido de 200ms para 50ms
 			} else {
 				setError(result.error || 'Erro ao fazer login');
 			}
 		} catch (error) {
+			console.error('Erro no login:', error);
 			setError('Erro inesperado. Tente novamente.');
 		} finally {
 			setLoading(false);

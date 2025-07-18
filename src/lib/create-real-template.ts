@@ -1,4 +1,5 @@
 import { WeddingTemplate } from '@/types/template';
+import { formatBrazilianDate, createBrazilianDate, toInputDateFormat } from '@/lib/utils';
 
 interface CoupleData {
   id: string;
@@ -9,13 +10,36 @@ interface CoupleData {
   wedding_time?: string;
   wedding_location?: string;
   wedding_address?: string;
+  
+  // Campos de convite
   invitation_message?: string;
+  invitation_title?: string;
+  formal_invitation_message?: string;
+  invitation_signature?: string;
+  
+  // Campos de história
   couple_story?: string;
+  story_title?: string;
+  first_meeting_date?: string;
+  first_meeting_story?: string;
+  engagement_date?: string;
+  engagement_story?: string;
+  
+  // Campos de contagem regressiva
+  countdown_title?: string;
+  countdown_message?: string;
+  
+  // Campos de imagem
   bride_photo?: string;
   groom_photo?: string;
   cover_photo_url?: string;
+  invitation_image_2?: string;
+  invitation_image_3?: string;
   hero_background_image?: string;
   couple_photo?: string;
+  
+  // Outros campos
+  welcomeMessage?: string;
   theme_color?: string;
   email: string;
   email_secondary?: string;
@@ -37,9 +61,15 @@ function getValidWeddingDate(dateString: string | null | undefined): Date {
     return futureDate;
   }
 
-  const date = new Date(dateString);
-  
-  // Check if date is valid
+  // Usar formatação brasileira para evitar problemas de timezone
+  if (dateString.includes('-')) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    // Criar data local brasileira SEM conversão UTC
+    return new Date(year, month - 1, day, 12, 0, 0); // Meio-dia para evitar DST issues
+  }
+
+  // Fallback para outros formatos
+  const date = new Date(dateString + 'T12:00:00');
   if (isNaN(date.getTime())) {
     // Return a future date if the date is invalid
     const futureDate = new Date();
@@ -52,8 +82,18 @@ function getValidWeddingDate(dateString: string | null | undefined): Date {
 
 // Helper function to safely format wedding date
 function formatWeddingDate(dateString: string | null | undefined): string {
-  const date = getValidWeddingDate(dateString);
-  return date.toLocaleDateString('pt-BR', {
+  if (!dateString) {
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    return formatBrazilianDate(futureDate, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  return formatBrazilianDate(dateString, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -63,8 +103,13 @@ function formatWeddingDate(dateString: string | null | undefined): string {
 
 // Helper function to safely get date string for inputs
 function getDateInputValue(dateString: string | null | undefined): string {
-  const date = getValidWeddingDate(dateString);
-  return date.toISOString().split('T')[0];
+  if (!dateString) {
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    return toInputDateFormat(futureDate);
+  }
+
+  return toInputDateFormat(dateString);
 }
 
 // Helper function to safely get time string
@@ -150,9 +195,10 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           brideName: { id: 'brideName', type: 'text', value: coupleData.bride_name },
           groomName: { id: 'groomName', type: 'text', value: coupleData.groom_name },
           weddingDate: { id: 'weddingDate', type: 'text', value: weddingDateFormatted },
-          location: { id: 'location', type: 'text', value: locationText },
-          subtitle: { id: 'subtitle', type: 'text', value: coupleData.invitation_message || 'Venha celebrar conosco o nosso grande dia!' },
-          backgroundImage: { id: 'backgroundImage', type: 'image', value: heroBackgroundImage }
+          weddingTime: { id: 'weddingTime', type: 'text', value: coupleData.wedding_time || '' },
+          location: { id: 'location', type: 'text', value: coupleData.wedding_location || locationText },
+          subtitle: { id: 'subtitle', type: 'text', value: coupleData.welcomeMessage || 'Venha celebrar conosco o nosso grande dia!' },
+          backgroundImage: { id: 'backgroundImage', type: 'image', value: coupleData.hero_background_image || heroBackgroundImage }
         },
         settings: {
           showTitle: true,
@@ -181,11 +227,17 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Você está convidado!' },
+          title: { id: 'title', type: 'text', value: coupleData.invitation_title || 'Você está convidado!' },
           message: { id: 'message', type: 'textarea', value: coupleData.invitation_message || 'É com grande alegria que convidamos você para celebrar conosco o nosso casamento. Sua presença é muito importante para nós e tornará este dia ainda mais especial.' },
-          formalMessage: { id: 'formalMessage', type: 'textarea', value: `${coupleData.bride_name} & ${coupleData.groom_name} têm a honra de convidar você para sua cerimônia de casamento em ${formatWeddingDate(coupleData.wedding_date)} às ${getTimeInputValue(coupleData.wedding_date, coupleData.wedding_time)} em ${locationText}.` },
-          signature: { id: 'signature', type: 'text', value: `Com amor, ${coupleNames}` },
-          invitationImage: { id: 'invitationImage', type: 'image', value: coupleData.cover_photo_url || '/image/template_layout.jpg' }
+          formalMessage: { id: 'formalMessage', type: 'textarea', value: coupleData.formal_invitation_message || `${coupleData.bride_name} & ${coupleData.groom_name} têm a honra de convidar você para sua cerimônia de casamento em ${formatWeddingDate(coupleData.wedding_date)} às ${getTimeInputValue(coupleData.wedding_date, coupleData.wedding_time)} em ${coupleData.wedding_location || locationText}.` },
+          signature: { id: 'signature', type: 'text', value: coupleData.invitation_signature && coupleData.invitation_signature.trim() 
+            ? (coupleData.invitation_signature.startsWith('Com amor') 
+                ? coupleData.invitation_signature 
+                : `Com amor, ${coupleData.invitation_signature}`)
+            : `Com amor, ${coupleNames}` },
+          invitationImage: { id: 'invitationImage', type: 'image', value: coupleData.cover_photo_url || '/image/template_layout.jpg' },
+          invitationImage2: { id: 'invitationImage2', type: 'image', value: coupleData.invitation_image_2 || '' },
+          invitationImage3: { id: 'invitationImage3', type: 'image', value: coupleData.invitation_image_3 || '' }
         },
         settings: {
           showTitle: true,
@@ -214,9 +266,9 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Faltam apenas...' },
+          title: { id: 'title', type: 'text', value: coupleData.countdown_title || 'Faltam apenas...' },
           targetDate: { id: 'targetDate', type: 'date', value: getDateInputValue(coupleData.wedding_date) },
-          message: { id: 'message', type: 'textarea', value: 'Dias para o nosso grande dia!' }
+          message: { id: 'message', type: 'textarea', value: coupleData.countdown_message || 'Dias para o nosso grande dia!' }
         },
         settings: {
           showTitle: true,
@@ -245,21 +297,21 @@ export function createRealTemplate(coupleData: CoupleData): WeddingTemplate {
           textColor: '#1f2937'
         },
         data: {
-          title: { id: 'title', type: 'text', value: 'Nossa História de Amor' },
+          title: { id: 'title', type: 'text', value: coupleData.story_title || 'Nossa História de Amor' },
           story: { id: 'story', type: 'textarea', value: coupleData.couple_story || 'Nossa história de amor começou de forma especial e única...' },
-          image: { id: 'image', type: 'image', value: coupleData.cover_photo_url || '/image/template_layout.jpg' },
+          image: { id: 'image', type: 'image', value: coupleData.couple_photo || '/image/template_layout.jpg' },
           timeline: [
             {
               id: 'timeline_1',
               title: 'Primeiro Encontro',
-              date: '2020-01-01',
-              description: 'Nos conhecemos em um dia especial...'
+              date: coupleData.first_meeting_date || '2020-01-01',
+              description: coupleData.first_meeting_story || 'Nos conhecemos em um dia especial...'
             },
             {
               id: 'timeline_2',
               title: 'Noivado',
-              date: '2022-06-15',
-              description: 'O pedido de casamento foi mágico...'
+              date: coupleData.engagement_date || '2022-06-15',
+              description: coupleData.engagement_story || 'O pedido de casamento foi mágico...'
             }
           ]
         },

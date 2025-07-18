@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useRouter } from 'next/navigation';
@@ -27,10 +27,12 @@ import {
 import Logo from '@/components/ui/logo';
 import { useAuth } from '@/contexts/auth-context';
 import { CompleteProfile } from '@/components/auth/complete-profile';
+import Loading from '@/components/ui/loading';
 
 export default function DashboardPage() {
 	const { user, loading, signOut } = useAuth();
 	const router = useRouter();
+	const [animationCompleted, setAnimationCompleted] = useState(false);
 	const [ref, inView] = useInView({
 		triggerOnce: true,
 		threshold: 0.1,
@@ -57,33 +59,18 @@ export default function DashboardPage() {
 		router.push('/');
 	};
 
-	if (loading) {
+	// ✅ Loading completo - usuário só vê conteúdo após animação terminar
+	if (loading || !animationCompleted) {
 		return (
-			<div className="min-h-screen relative overflow-hidden">
-				{/* Background com Loading */}
-				<div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50/50 to-blue-50/30"></div>
-
-				<div className="relative z-10 min-h-screen flex items-center justify-center">
-					<motion.div
-						initial={{ opacity: 0, scale: 0.8 }}
-						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.8 }}
-						className="text-center"
-					>
-						<div className="w-20 h-20 mx-auto mb-6 relative">
-							<motion.div
-								className="w-full h-full border-4 border-purple-300 border-t-purple-600 rounded-full"
-								animate={{ rotate: 360 }}
-								transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-							/>
-							<Heart className="absolute inset-0 m-auto w-8 h-8 text-purple-600" />
-						</div>
-						<p className="text-gray-600 font-medium">
-							Carregando seu painel...
-						</p>
-					</motion.div>
-				</div>
-			</div>
+			<Loading 
+				message="Carregando seu painel..." 
+				showTimeout={true}
+				timeoutSeconds={2}
+				onComplete={() => {
+					console.log('Dashboard: Animação completada');
+					setAnimationCompleted(true);
+				}}
+			/>
 		);
 	}
 

@@ -1,7 +1,8 @@
 'use client'
 
+import { motion } from 'framer-motion'
+import { Calendar, MapPin, Users, Heart } from 'lucide-react'
 import { useTenant } from '@/contexts/tenant-context'
-import { Heart, Calendar, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import RomanticDecorations from '@/components/ui/romantic-decorations'
@@ -10,26 +11,9 @@ import Image from 'next/image'
 export default function WeddingHero() {
   const { couple, isLoading } = useTenant()
 
-  if (isLoading) {
-    return (
-      <div className="relative min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!couple) {
-    return (
-      <div className="relative min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Casal não encontrado</p>
-        </div>
-      </div>
-    )
+  // ✅ Seções não precisam loading de página - apenas renderizar vazio se carregando
+  if (isLoading || !couple) {
+    return null
   }
 
   const weddingDate = new Date(couple.wedding_date)

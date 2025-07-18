@@ -2,27 +2,44 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 interface CoupleData {
+  // Dados básicos
   id: string
   slug: string
-  brideName: string
-  groomName: string
-  weddingDate: string
-  weddingDateTime: string
-  ceremonyVenue?: string
-  receptionVenue?: string
-  welcomeMessage?: string
-  story?: string
-  coverPhotoUrl?: string
-  themeColors?: any
-  email: string
-  emailSecondary?: string
-  city: string
-  state: string
-  country?: string
-  bridePhone?: string
-  groomPhone?: string
-  isActive: boolean
-  isPublished: boolean
+  bride_name: string
+  groom_name: string
+  wedding_date: string
+  wedding_time?: string
+  wedding_location?: string
+  wedding_address?: string
+  wedding_datetime: string
+  
+  // Configurações
+  theme?: string
+  privacy_level?: string
+  created_at?: string
+  
+  // Fotos
+  bride_photo?: string
+  groom_photo?: string
+  cover_photo_url?: string
+  couple_photo?: string
+  hero_background_image?: string
+  
+  // Conteúdo
+  couple_story?: string
+  story_title?: string
+  
+  // 💌 CAMPOS DE INVITATION PARA SINCRONIZAÇÃO
+  invitation_title?: string
+  invitation_message?: string
+  formal_invitation_message?: string
+  invitation_signature?: string
+  invitation_image_2?: string
+  invitation_image_3?: string
+  
+  // ⏰ CAMPOS DE COUNTDOWN PARA SINCRONIZAÇÃO
+  countdown_title?: string
+  countdown_message?: string
 }
 
 // GET - Buscar dados completos do casal pelo slug (API PÚBLICA)
@@ -64,6 +81,9 @@ export async function GET(
         bride_name,
         groom_name,
         wedding_date,
+        wedding_time,
+        wedding_location,
+        wedding_address,
         wedding_datetime,
         ceremony_venue,
         reception_venue,
@@ -79,7 +99,15 @@ export async function GET(
         bride_phone,
         groom_phone,
         is_active,
-        is_published
+        is_published,
+        invitation_title,
+        invitation_message,
+        formal_invitation_message,
+        invitation_signature,
+        invitation_image_2,
+        invitation_image_3,
+        countdown_title,
+        countdown_message
       `)
       .eq('slug', slug)
       .eq('is_published', true) // Apenas sites publicados
@@ -123,27 +151,38 @@ export async function GET(
 
     // Transformar dados para formato consistente
     const coupleData: CoupleData = {
+      // Dados básicos
       id: couple.id,
       slug: couple.slug,
-      brideName: couple.bride_name,
-      groomName: couple.groom_name,
-      weddingDate: couple.wedding_date,
-      weddingDateTime: couple.wedding_datetime,
-      ceremonyVenue: couple.ceremony_venue,
-      receptionVenue: couple.reception_venue,
-      welcomeMessage: couple.welcome_message,
-      story: couple.story,
-      coverPhotoUrl: couple.cover_photo_url,
-      themeColors: couple.theme_colors,
-      email: couple.email,
-      emailSecondary: couple.email_secondary,
-      city: couple.city,
-      state: couple.state,
-      country: couple.country,
-      bridePhone: couple.bride_phone,
-      groomPhone: couple.groom_phone,
-      isActive: couple.is_active,
-      isPublished: couple.is_published
+      bride_name: couple.bride_name,
+      groom_name: couple.groom_name,
+      wedding_date: couple.wedding_date,
+      wedding_time: couple.wedding_time,
+      wedding_location: couple.wedding_location,
+      wedding_address: couple.wedding_address,
+      wedding_datetime: couple.wedding_datetime,
+      
+      // Configurações
+      theme: couple.theme_colors,
+      privacy_level: 'public',
+      
+      // Fotos (usando apenas campos que existem no SELECT)
+      cover_photo_url: couple.cover_photo_url,
+      
+      // Conteúdo (usando apenas campos que existem no SELECT)
+      couple_story: couple.story,
+      
+      // 💌 CAMPOS DE INVITATION PARA SINCRONIZAÇÃO
+      invitation_title: couple.invitation_title,
+      invitation_message: couple.invitation_message,
+      formal_invitation_message: couple.formal_invitation_message,
+      invitation_signature: couple.invitation_signature,
+      invitation_image_2: couple.invitation_image_2,
+      invitation_image_3: couple.invitation_image_3,
+      
+      // ⏰ CAMPOS DE COUNTDOWN PARA SINCRONIZAÇÃO
+      countdown_title: couple.countdown_title,
+      countdown_message: couple.countdown_message
     }
 
     return NextResponse.json({

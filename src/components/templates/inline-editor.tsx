@@ -635,7 +635,22 @@ export function InlineEditor({
         );
 
       case 'date':
-        return new Date(String(value)).toLocaleDateString('pt-BR');
+        // Usar formatação brasileira para evitar problemas de timezone
+        try {
+          const dateString = String(value);
+          if (!dateString) return '';
+          
+          // Se é formato YYYY-MM-DD, criar data local
+          if (dateString.includes('-')) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const localDate = new Date(year, month - 1, day);
+            return localDate.toLocaleDateString('pt-BR');
+          }
+          
+          return new Date(dateString).toLocaleDateString('pt-BR');
+        } catch {
+          return String(value);
+        }
 
       case 'time':
         return displayValue;

@@ -30,52 +30,110 @@ model SubscriptionPlan {
 }
 
 model Couple {
-  id                 String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  userId             String              @map("user_id") @db.Uuid
-  slug               String              @unique @db.VarChar(100)
-  customDomain       String?             @unique @map("custom_domain") @db.VarChar(255)
-  brideName          String              @map("bride_name") @db.VarChar(150)
-  groomName          String              @map("groom_name") @db.VarChar(150)
-  wedding_date       DateTime            @db.Date
-  ceremonyVenue      String?             @map("ceremony_venue")
-  receptionVenue     String?             @map("reception_venue")
-  welcomeMessage     String?             @map("welcome_message")
-  story              String?
-  coverPhotoUrl      String?             @map("cover_photo_url")
-  themeColors        Json?               @default("{\"text\": \"#171717\", \"accent\": \"#06b6d4\", \"primary\": \"#d946ef\", \"secondary\": \"#f97316\", \"background\": \"#fafafa\"}") @map("theme_colors")
-  isActive           Boolean?            @default(true) @map("is_active")
-  isPublished        Boolean?            @default(false) @map("is_published")
-  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  email              String              @db.VarChar(255)
-  emailSecondary     String?             @map("email_secondary") @db.VarChar(255)
-  city               String              @db.VarChar(100)
-  state              String              @db.VarChar(100)
-  country            String?             @default("Brasil") @db.VarChar(100)
-  bridePhone         String?             @map("bride_phone") @db.VarChar(20)
-  groomPhone         String?             @map("groom_phone") @db.VarChar(20)
-  weddingDateTime    DateTime            @map("wedding_datetime") @db.Timestamptz(6)
-  signupRole         String              @map("signup_role") @db.VarChar(20)
-  termsAcceptedAt    DateTime            @map("terms_accepted_at") @db.Timestamptz(6)
-  achievements       Achievement[]
-  analyticsEvents    AnalyticsEvent[]
-  contributions      Contribution[]
-  users              users               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  customDomains      CustomDomain[]
-  emailNotifications EmailNotification[]
-  gifts              Gift[]
-  guestGroups        GuestGroup[]
-  guests             Guest[]
-  messages           Message[]
-  photos             Photo[]
-  scheduleEvents     ScheduleEvent[]
-  subscriptions      Subscription[]
+  id                        String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId                    String              @map("user_id") @db.Uuid
+  slug                      String              @unique @db.VarChar(100)
+  customDomain              String?             @unique @map("custom_domain") @db.VarChar(255)
+  brideName                 String              @map("bride_name") @db.VarChar(150)
+  groomName                 String              @map("groom_name") @db.VarChar(150)
+  wedding_date              DateTime            @db.Date
+  ceremonyVenue             String?             @map("ceremony_venue")
+  receptionVenue            String?             @map("reception_venue")
+  welcomeMessage            String?             @map("welcome_message")
+  story                     String?
+  coverPhotoUrl             String?             @map("cover_photo_url")
+  themeColors               Json?               @default("{\"text\": \"#171717\", \"accent\": \"#06b6d4\", \"primary\": \"#d946ef\", \"secondary\": \"#f97316\", \"background\": \"#fafafa\"}") @map("theme_colors")
+  isActive                  Boolean?            @default(true) @map("is_active")
+  isPublished               Boolean?            @default(false) @map("is_published")
+  createdAt                 DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  email                     String              @db.VarChar(255)
+  emailSecondary            String?             @map("email_secondary") @db.VarChar(255)
+  city                      String              @db.VarChar(100)
+  state                     String              @db.VarChar(100)
+  country                   String?             @default("Brasil") @db.VarChar(100)
+  bridePhone                String?             @map("bride_phone") @db.VarChar(20)
+  groomPhone                String?             @map("groom_phone") @db.VarChar(20)
+  weddingDateTime           DateTime            @map("wedding_datetime") @db.Timestamptz(6)
+  signupRole                String              @map("signup_role") @db.VarChar(20)
+  termsAcceptedAt           DateTime            @map("terms_accepted_at") @db.Timestamptz(6)
+  template_id               String?             @default("classico") @db.VarChar(50)
+  wedding_time              String?             @db.VarChar(10)
+  bride_photo               String?             @db.VarChar(500)
+  groom_photo               String?             @db.VarChar(500)
+  invitation_title          String?             @db.VarChar(255)
+  formal_invitation_message String?
+  invitation_signature      String?             @db.VarChar(255)
+  story_title               String?             @db.VarChar(255)
+  couple_photo              String?             @db.VarChar(500)
+  first_meeting_date        DateTime?           @db.Date
+  first_meeting_story       String?
+  engagement_date           DateTime?           @db.Date
+  engagement_story          String?
+  countdown_title           String?             @db.VarChar(255)
+  countdown_message         String?
+  hero_background_image     String?             @db.VarChar(500)
+  custom_css                String?
+  theme_color               String?             @default("#fe97a2") @db.VarChar(7)
+  wedding_location          String?             @db.VarChar(500)
+  wedding_address           String?
+  invitation_message        String?
+  ceremony_time             String?             @db.VarChar(10)
+  reception_time            String?             @db.VarChar(10)
+  directions                String?
+  parking_info              String?
+  rsvp_title                String?             @db.VarChar(255)
+  rsvp_subtitle             String?             @db.VarChar(255)
+  rsvp_deadline             DateTime?           @db.Date
+  rsvp_message              String?
+  rsvp_confirmation_message String?
+  groomsmen_title           String?             @db.VarChar(255)
+  groomsmen_subtitle        String?             @db.VarChar(255)
+  details_title             String?             @db.VarChar(255)
+  dress_code                String?             @db.VarChar(255)
+  dress_code_description    String?
+  important_notes           String?
+  gallery_title             String?             @db.VarChar(255)
+  gallery_subtitle          String?             @db.VarChar(255)
+  testimonials_title        String?             @db.VarChar(255)
+  testimonials_subtitle     String?             @db.VarChar(255)
+  testimonials_message      String?
+  testimonials_auto_approve Boolean?            @default(false)
+  gamification_title        String?             @db.VarChar(255)
+  gamification_subtitle     String?             @db.VarChar(255)
+  pix_key                   String?             @db.VarChar(255)
+  footer_thank_you_message  String?
+  footer_signature          String?             @db.VarChar(255)
+  footer_contact_email      String?             @db.VarChar(255)
+  footer_contact_phone      String?             @db.VarChar(20)
+  achievements              Achievement[]
+  analyticsEvents           AnalyticsEvent[]
+  contributions             Contribution[]
+  users                     users               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customDomains             CustomDomain[]
+  emailNotifications        EmailNotification[]
+  gifts                     Gift[]
+  guestGroups               GuestGroup[]
+  guests                    Guest[]
+  messages                  Message[]
+  photos                    Photo[]
+  scheduleEvents            ScheduleEvent[]
+  subscriptions             Subscription[]
 
   @@index([email], map: "idx_couples_email")
   @@index([city, state], map: "idx_couples_location")
   @@index([slug], map: "idx_couples_slug")
   @@index([userId], map: "idx_couples_user_id")
   @@index([weddingDateTime], map: "idx_couples_wedding_datetime")
+  @@index([template_id], map: "idx_couples_template_id")
+  @@index([theme_color], map: "idx_couples_theme_color")
+  @@index([userId, template_id], map: "idx_couples_user_template")
+  @@index([wedding_location], map: "idx_couples_wedding_location")
+  @@index([wedding_time], map: "idx_couples_wedding_time")
+  @@index([ceremony_time], map: "idx_couples_ceremony_time")
+  @@index([pix_key], map: "idx_couples_pix_key")
+  @@index([reception_time], map: "idx_couples_reception_time")
+  @@index([rsvp_deadline], map: "idx_couples_rsvp_deadline")
   @@map("couples")
   @@schema("public")
 }

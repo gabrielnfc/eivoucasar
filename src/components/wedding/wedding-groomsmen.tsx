@@ -1,45 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Users, Heart, Star, Phone } from 'lucide-react'
 import { useTenant } from '@/contexts/tenant-context'
-import { Users, Heart, Crown, Phone } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import type { Groomsman } from '@/types'
 import Image from 'next/image'
 
 export default function WeddingGroomsmen() {
   const { couple } = useTenant()
-  const [groomsmen, setGroomsmen] = useState<Groomsman[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Simulate loading
   useEffect(() => {
-    if (!couple?.id) return
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1500)
 
-    const fetchGroomsmen = async () => {
-      try {
-        const supabase = createClient()
-        
-        const { data, error } = await supabase
-          .from('groomsmen')
-          .select('*')
-          .eq('couple_id', couple.id)
-          .order('role', { ascending: true })
+    return () => clearTimeout(timer)
+  }, [])
 
-        if (error) {
-          console.error('Error fetching groomsmen:', error)
-          return
-        }
-
-        setGroomsmen((data || []) as unknown as Groomsman[])
-      } catch (error) {
-        console.error('Error fetching groomsmen:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchGroomsmen()
-  }, [couple?.id])
+  // ✅ Seções não precisam loading de página - apenas renderizar vazio se carregando
+  if (isLoading || !couple) {
+    return null
+  }
 
   const getRoleLabel = (role: string) => {
     switch (role) {
@@ -60,7 +43,7 @@ export default function WeddingGroomsmen() {
     switch (role) {
       case 'best_man':
       case 'maid_of_honor':
-        return <Crown className="h-4 w-4 text-amber-500" />
+        return <Star className="h-4 w-4 text-amber-500" />
       default:
         return <Heart className="h-4 w-4 text-rose-500" />
     }
@@ -74,18 +57,7 @@ export default function WeddingGroomsmen() {
 
   if (!couple) return null
 
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando padrinhos...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (groomsmen.length === 0) {
+  if (!couple.groom_name || !couple.bride_name) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-rose-100">
@@ -115,8 +87,9 @@ export default function WeddingGroomsmen() {
     )
   }
 
-  const groomsmenList = groomsmen.filter(g => g.role === 'groomsman' || g.role === 'best_man')
-  const bridesmaids = groomsmen.filter(g => g.role === 'bridesmaid' || g.role === 'maid_of_honor')
+  // TODO: Implementar busca de padrinhos do banco de dados
+  const groomsmenList: any[] = []
+  const bridesmaids: any[] = []
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

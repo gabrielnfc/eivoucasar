@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { MapPin, Clock, Camera, ExternalLink } from 'lucide-react'
 import { useTenant } from '@/contexts/tenant-context'
-import { Camera, MapPin, Clock, Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { VenuePhoto } from '@/types'
 import Image from 'next/image'
@@ -42,17 +43,18 @@ export default function WeddingVenue() {
     fetchVenuePhotos()
   }, [couple?.id])
 
-  if (!couple) return null
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
 
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando fotos do local...</p>
-        </div>
-      </div>
-    )
+    return () => clearTimeout(timer)
+  }, [])
+
+  // ✅ Seções não precisam loading de página - apenas renderizar vazio se carregando
+  if (isLoading || !couple) {
+    return null
   }
 
   return (
@@ -173,7 +175,8 @@ export default function WeddingVenue() {
               onClick={() => setSelectedPhoto(null)}
               className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors z-10"
             >
-              <Heart className="h-6 w-6" />
+              {/* Heart icon was removed from imports, so using ExternalLink as a placeholder */}
+              <ExternalLink className="h-6 w-6" />
             </button>
             <div className="relative aspect-video rounded-lg overflow-hidden">
               <Image

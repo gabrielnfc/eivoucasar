@@ -88,6 +88,7 @@ export interface NewHeroSectionData {
   brideName: EditableField;
   groomName: EditableField;
   weddingDate: EditableField;
+  weddingTime?: EditableField;
   location: EditableField;
   subtitle?: EditableField;
   backgroundImage?: EditableField;
@@ -98,6 +99,8 @@ export interface InvitationSectionData {
   message: EditableField;
   formalMessage: EditableField;
   invitationImage?: EditableField;
+  invitationImage2?: EditableField;
+  invitationImage3?: EditableField;
   signature: EditableField;
 }
 
@@ -105,11 +108,6 @@ export interface CountdownSectionData {
   title: EditableField;
   targetDate: EditableField;
   message: EditableField;
-  showDays: boolean;
-  showHours: boolean;
-  showMinutes: boolean;
-  showSeconds: boolean;
-  completedMessage: EditableField;
 }
 
 export interface StorySectionData {

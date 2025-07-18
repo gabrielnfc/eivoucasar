@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { WeddingTemplate } from '@/types/template'
+import { getDbFieldFromTemplate } from '@/lib/utils/template-field-mapping'
+import { prisma } from '@/lib/database/prisma'
 
 // Mock data - em produção viria do banco de dados
 const mockTemplate: WeddingTemplate = {
@@ -94,20 +96,61 @@ export async function PUT(
       )
     }
     
-    // Em produção:
-    // await updateTemplateField(coupleId, body.sectionId, body.fieldId, body.value)
+    // 🔄 SINCRONIZAÇÃO BIDIRECIONAL: Template → Banco de Dados
+    const dbField = getDbFieldFromTemplate(body.sectionId, body.fieldId)
     
-    console.log('Template atualizado:', {
-      coupleId,
-      sectionId: body.sectionId,
-      fieldId: body.fieldId,
-      value: body.value
-    })
+    if (!dbField) {
+      console.warn(`Campo não mapeado: ${body.sectionId}.${body.fieldId}`)
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Campo não mapeado para banco de dados',
+        warning: `${body.sectionId}.${body.fieldId} não possui mapeamento`
+      })
+    }
     
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Template atualizado com sucesso' 
-    })
+    // ✅ SALVAR NO BANCO DE DADOS
+    try {
+      const updateData: any = {}
+      updateData[dbField] = body.value
+      
+      await prisma.couple.update({
+        where: { id: coupleId },
+        data: updateData
+      })
+      
+      console.log('✅ Campo salvo no banco:', {
+        coupleId,
+        templateField: `${body.sectionId}.${body.fieldId}`,
+        dbField,
+        value: body.value
+      })
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Template atualizado e sincronizado com configurações',
+        syncInfo: {
+          templateField: `${body.sectionId}.${body.fieldId}`,
+          dbField,
+          synced: true
+        }
+      })
+      
+    } catch (dbError: any) {
+      console.error('❌ Erro ao salvar no banco:', dbError)
+      
+      // Se falhar no banco, ainda retorna sucesso para não quebrar a UX
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Template atualizado (erro na sincronização)',
+        warning: 'Não foi possível sincronizar com configurações',
+        syncInfo: {
+          templateField: `${body.sectionId}.${body.fieldId}`,
+          dbField,
+          synced: false,
+          error: dbError.message
+        }
+      })
+    }
     
   } catch (error) {
     console.error('Erro ao atualizar template:', error)
